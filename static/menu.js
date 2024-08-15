@@ -25,6 +25,7 @@ $(document).ready(function() {
 		buttons: {
 		  寄出: function() {
 			// addTab();
+			addpostcard(form[0]);
 			$( this ).dialog( "close" );
 		  },
 		  取消: function() {
@@ -50,6 +51,42 @@ $(document).ready(function() {
 		  console.log('dialog open');
 		});
 	}
+
+
+	function addpostcard(dialog) {
+
+		// 從 localStorage 獲取 JWT
+		const token = localStorage.getItem('token')
+
+		// var formData = new FormData(form);  // 使用傳入的表單
+
+		// 將 Formdata 變成 JSON 格式
+		var jsonformData = {
+			// mailFrom: $('#mailFrom').val(),
+			// country: $('#country-select').val(),
+			message: $('#tab_title').val()
+		};
+
+		console.log(jsonformData)
+
+		fetch("/api/postcards", {
+			headers: {
+				'Authorization': `Bearer ${token}`, // 將 JWT 放在 Authorization Header 中
+				'Content-Type': 'application/json'
+			},
+			method: "POST",
+			body: JSON.stringify(jsonformData)
+		})
+		.then(response => response.json())
+		.then(data => {
+		  console.log("Form submitted successfully:", data);
+		//   dialog.dialog("close");
+		})
+		.catch(error => {
+		  console.error("Form submission failed:", error);
+		});
+	  }
+
   
 	// Invoke the functions
 	country();
