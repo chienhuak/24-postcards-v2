@@ -1,0 +1,383 @@
+/* 改變所有文字預設顏色 */
+*,
+html,
+body {
+    color: #666666;
+}
+
+body {
+    /* display:flex; */
+    align-content: center;
+    /* border: dashed goldenrod 5px; */
+    margin:0;
+    width: 100%;
+    max-width: 100vw; /* 確保容器不會超出視窗的寬度 */
+    overflow-x: hidden; /* 隱藏左右滾動條(超出的內容) */
+    box-sizing: border-box;
+}
+
+.home-link {
+    color: #448899;
+    font-style: normal;
+    font-size: 2em;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 50px;
+    /* width: calc(100vw - scrollbarWidth); */
+    /* border : dotted 3px orange; */
+    box-sizing: border-box;
+    position: fixed;
+    z-index: 999;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #ddd;
+}
+
+.nav-group {
+    display: flex;
+    width: 1200px;
+    justify-content: space-between;
+    align-items: center;
+    margin: auto;
+}
+
+/* Container needed to position the button. Adjust the width as needed */
+.container {
+    position: relative;
+    /* width: calc(100vw - scrollbarWidth); */
+    width: 100vw;
+  }
+
+/* Make the image responsive */
+/* .container .home */
+.home {
+    width: 100%;
+    /* height: auto; */
+    object-fit: cover;
+  }
+
+.search_btn {
+    background-color: #448899;
+    padding: 6px;
+    margin:0;
+    border:solid #1c414a00 1px;
+    border-radius: 0 5px 5px 0;
+}
+
+.search_img {
+    display: inline-block;
+    width:20px;
+    /* font: normal normal normal 14px / 1 fontawesome;
+    font-size: inherit;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale; */
+    transform: translate(0, 0);
+}
+
+#search-input {
+    margin: 0;
+    padding: 10px;
+    float:left;
+    border:solid #1c414a00 1px;
+    border-radius: 5px 0 0 5px;
+}
+
+/* Style the button and place it in the middle of the container/image */
+.container .searchbar {
+    position: absolute;
+    max-width: 1200px;
+    width: 95%;
+    top: 50%;
+    /* margin:auto; */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -ms-transform: translate(-50%, -50%);
+    background-color: transparent;
+    color: white;
+    font-size: 16px;
+    /* padding: 0px; */
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    /* z-index: 997; */
+    
+  }
+
+.a-style-1 {
+    display: inline-block;
+    padding: 3px;
+    text-decoration: none;
+    width:80px;
+    text-align: center;
+    color:  #448899;
+}
+
+#container2 {
+    display:flex;
+    max-width: 1200px;
+    width: 100vw;
+    flex-wrap: wrap;
+    justify-content: left;
+    /* border: solid pink 2px; */
+    margin: auto;
+    box-sizing: border-box;
+}
+
+.imgbox {
+    height: 242px;
+    width: 270px;
+    position: relative;
+    border: solid rgba(128, 128, 128, 0.39) 1px;
+    margin: 10px auto ;
+}
+
+.myphoto {
+    height: 197px;
+    width: 270px;
+    object-fit: cover;
+}
+
+.p1 {
+    position: absolute;
+    width:100%;
+    top: 158px; /* 距離圖片下緣的距離 */
+    color: rgb(255, 255, 255);
+    text-align: left;
+    background-color: rgba(0,0,0,0.6); /* 背景顏色及透明度 */
+    padding: 9px 5%; /* 文字框內的間距 */
+    margin: 0;
+    box-sizing: border-box;
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.textbox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* border: solid orange 3px; */
+    padding: 9px 5%;
+}
+
+.slide-bar {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+    /* border: solid pink 2px; */
+    width: 1200px;
+    margin: auto;
+    box-sizing: border-box;
+    padding: 0px 15px;
+}
+
+#container1 {
+    display: flex;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    flex-grow: 1;
+    width: 80vw;
+}
+
+.mrt {
+    font-size: medium;
+    border: none;
+    background-color: transparent;
+    padding: 6px;
+    cursor: grab;
+    margin: 10px;
+}
+
+.arrow-img {
+    align-items: center;
+    width: 23px;
+    margin: 0;
+}
+
+.card {
+    position: fixed;
+    width: 340px;
+    z-index: 999;
+    border : solid 1px rgba(0,0,0,.125);
+    background-color: azure;
+    border-radius: .25em;
+    top: 70px;
+    left:50%;
+    transform: translateX(-50%);
+    padding: 25px;
+    display: none;
+} 
+
+.card-decorator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 10px; /* 裝飾條的高度 */
+    background-color: #448899; /* 裝飾條的顏色 */
+}
+
+
+::placeholder {
+    color: rgb(187, 198, 198);
+}
+
+.popup-input {
+    height: 47px;
+    width: 310px;
+    padding: 15px;
+    margin: 10px 0px;
+    border : solid 1px rgba(0,0,0,.125);
+    border-radius: .25em;
+    box-sizing: border-box;
+}
+
+.popup-btn {
+    font-size: 19px;
+    height: 47px;
+    width: 310px;
+    padding: 5px;
+    margin: 10px 0px;
+    background-color: #448899;
+    color:rgb(255, 255, 255);
+    border : solid 1px rgba(0,0,0,.125);
+    border-radius: .25em;
+    box-sizing: border-box;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    z-index: 1;
+}
+
+#name {
+    display : none;
+}
+
+
+.close-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+#signout-btn {
+    display: none;
+}
+
+
+.underlink {
+    text-decoration: underline;
+    color : blueviolet;
+}
+
+
+.footer {
+    align-items: center; 
+    height: 60px;
+    background-color: rgb(171, 189, 189);
+    color: rgb(0, 0, 0);
+    text-align: center;
+    line-height: 60px;
+    /* position: fixed;
+    bottom:0;
+    width: 100%; */
+}
+
+.note {
+    color: red;
+    width: 310px;
+    margin: auto;
+}
+
+.center-text {
+    text-align: center
+}
+
+.change-card:hover {
+    cursor: pointer; /* 當 hover 時變成指針形狀 */
+}
+
+.container1200 {
+    width: 1200px;
+    margin:auto;
+}
+
+.trash-icon {
+    width: 35px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+/* 
+html {
+    overflow-y: scroll;
+} */
+
+
+@media (max-width: 1200px){
+
+    .container .home {
+        height: 360px;
+        }
+
+    .container .searchbar {
+        width: 80%;
+        }
+
+    #container2 {
+        width: 80%;
+    }     
+    
+    .slide-bar {
+        width: 80%;
+    }
+
+    .nav-group {
+        width: 100%;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .container .home {
+        height: 360px;
+        }
+
+    .slide-bar {
+        width: 360px;
+        }
+
+    .container .searchbar {
+        width: 320px;
+        }
+
+    .imgbox {
+        width: 320px;
+    }
+
+    .myphoto {
+        width: 100%;
+    }
+
+}

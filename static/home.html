@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/menu.css">
+  <link rel="stylesheet" href="/static/on-off-button.css">
+
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ==" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js" integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw==" crossorigin=""></script>
+
+  <!-- 引入 jQuery 的 stylesheet 文件 -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
+
+  <!-- 引入 Font Awesome 的 CSS 文件 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+</head>
+<body>
+  <div class="overlay" id="overlay"></div>
+  <nav>
+    <div class="nav-group">
+      <a class="home-link" href="/home">Project-July Postcards</a>
+      <div>
+        <a class = "a-style-1" href="/feed" onclick="toFeed()">留言板</a>
+        <a id = "signin-card" class = "a-style-1" href="" onclick="card(); return false;">登入/註冊</a>
+        <a id = "signout-btn" class = "a-style-1" href="" onclick="signout()">登出</a>
+      </div>
+    </div>
+    <!-- pop up memu -->
+    <div class = "card">
+      <div class = "card-decorator"></div>
+      <button class = "close-btn" type="button" onclick="card_close()">X</button>
+      <h1>登入會員帳號</h1>
+      <input type="text"  id = "email" class = "popup-input" placeholder="輸入電子信箱">
+      <input type="password"  id = "password" class = "popup-input" placeholder="輸入密碼">
+      <button class = "popup-btn" type="button" onclick="signin()">登入帳戶</button>
+      <p class="center-text">還沒有帳戶？<span class="change-card" onclick="showRegister()">點此註冊</span></p>
+      <p id="note2" class="note center-text"></p>
+    </div>
+    <div class = "card" id = "cardx">
+      <div class = "card-decorator"></div>
+      <button class = "close-btn" type="button" onclick="card_close()">X</button>
+      <h1>註冊會員帳號</h1>
+      <input type="text"  id = "namex" class = "popup-input" placeholder="輸入暱稱">
+      <input type="text"  id = "emailx" class = "popup-input" placeholder="輸入電子信箱">
+      <input type="password"  id = "passwordx" class = "popup-input" placeholder="輸入密碼">
+      <!-- <input type="text"  id = "countryx" class = "popup-input" placeholder="輸入國家"> -->
+      <select id="country-select" name="country" class = "popup-input">
+        <option value="">（選擇國家）</option>
+      </select>
+      <button class = "popup-btn" onclick="register()">註冊</button>
+      <p class="center-text"><span class="change-card" onclick="showSignin()">已經有帳戶了？點此登入</span></p>
+      <p id="note" class="note center-text"></p>
+    </div>
+  </nav>
+  <div name="placeholder" style="height:50px;"></div>
+  <div class="container1200">
+    <div id="mapid" style="width: 1200px; height: 600px;"></div>
+  </div>
+
+  <!-- 寄送明信片編輯框 -->
+  <div id="dialog" title="編輯中...">
+    <form>
+      <fieldset class="ui-helper-reset">
+      <label for="img_upload">Photo</label>
+      <input id="img_upload" name="img_upload" type="file">
+      <label for="tab_title">Title</label>
+      <input type="text" name="tab_title" id="tab_title" value="Tab Title" class="ui-widget-content ui-corner-all">
+      <label for="tab_content">Content</label>
+      <textarea name="tab_content" id="tab_content" class="ui-widget-content ui-corner-all">輸入一點訊息</textarea>
+      <!-- Rounded switch -->
+      <label>Random Mode</label>
+      <label class="switch">
+        <input type="checkbox">
+        <span class="slider round"></span>
+      </label>
+      </fieldset>
+    </form>
+  </div>
+
+  <!-- <button id="action_btn">選擇</button> -->
+
+  <!-- 其他功能按鈕 -->
+  <div id="postcard">
+      <button type="button" id="action_btn"><i class="fa fa-envelope"></i></button>
+  </div>
+  <div id="createcard">
+      <button type="button"> <i class="fa fa-pencil"></i></button>
+  </div>
+
+  <footer class="footer">Copyright 	&#169;  Project-July</footer>
+
+  <script src="/static/auth.js"></script>
+
+    <!-- jQuery first -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
+    <script src="/static/menu.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+        checkLoginStatus()
+      })
+    </script>
+    <!-- Leaflet Map Script -->  
+    <script>
+
+      var mymap = L.map('mapid', {
+        // options can go in here
+      }).setView(
+        [25.000205219171278,121.30057531237935], // center is set here   // 經緯度
+      4);   // 縮放
+  
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'    // 地圖樣式圖層
+      }).addTo(mymap);
+  
+      L.marker([25.000205219171278,121.30057531237935]).addTo(mymap).bindPopup('Hi 我在這裡').openPopup(); // create marker here
+      L.marker([25.000205219171278,100.30057531237935]).addTo(mymap).bindPopup('來自朋友的明信片 <img src="http://via.placeholder.com/100x50">'); // create marker here
+      L.marker([40.000205219171278,80.30057531237935]).addTo(mymap).bindPopup('來自朋友的明信片 <img src="http://via.placeholder.com/100x50">'); // create marker here
+      L.marker([-37.901918, 145.051624]).addTo(mymap).bindPopup('我在澳洲有好可愛的袋鼠！ <img src="http://via.placeholder.com/100x50">'); // create marker here
+  
+    </script>
+</body>
+</html>
