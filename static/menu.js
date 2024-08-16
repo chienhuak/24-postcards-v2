@@ -53,10 +53,37 @@ $(document).ready(function() {
 	}
 
 
-	function addpostcard(dialog) {
+	async function addpostcard(dialog) {
 
 		// 從 localStorage 獲取 JWT
 		const token = localStorage.getItem('token')
+
+		// 預設經緯度為 null
+		let latitude = null;
+		let longitude = null;
+
+		// Promise
+		const getLocation = () => new Promise((resolve, reject) => {
+			// 檢查瀏覽器是否支持地理定位 
+			if (navigator.geolocation) {
+				console.log("取得瀏覽器定位")
+				navigator.geolocation.getCurrentPosition(position => {
+					resolve({
+					// 取得經緯度
+					latitude : position.coords.latitude,
+					longitude : position.coords.longitude
+					});
+				})}
+			else {
+				console.log("瀏覽器不支援定位")
+				resolve({ latitude: null, longitude: null });
+			}
+		})
+
+		// 等待地理定位结果
+		const { latitude: locLatitude, longitude: locLongitude } = await getLocation();
+		latitude = locLatitude;
+		longitude = locLongitude;
 
 		// var formData = new FormData(form);  // 使用傳入的表單
 
@@ -64,7 +91,9 @@ $(document).ready(function() {
 		var jsonformData = {
 			// mailFrom: $('#mailFrom').val(),
 			// country: $('#country-select').val(),
-			message: $('#tab_title').val()
+			message: $('#tab_title').val(),
+			latitude : latitude,
+			longitude : longitude
 		};
 
 		console.log(jsonformData)

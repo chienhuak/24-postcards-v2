@@ -13,8 +13,14 @@ import re
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import requests
 from fastapi import FastAPI, File, UploadFile
+# 用 Python 管理 AWS 資源 (例如：S3)
 import boto3
 from botocore.exceptions import NoCredentialsError
+# 使用 ORM 框架
+# pip install SQLAlchemy
+# from sqlalchemy import create_engine
+# from sqlalchemy.orm import sessionmaker
+# from sqlalchemy.exc import SQLAlchemyError
 
 
 app=FastAPI(debug=True)
@@ -116,16 +122,19 @@ async def add_postcards(request: Request):
 		# 將資料存到 POSTCARDS DB
 		with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
 			query = """
-				INSERT INTO postcards (mailFrom, country, message)
-				VALUES (%s, %s, %s)
+				INSERT INTO postcards (mailFrom, country, message, latitude, longitude)
+				VALUES (%s, %s, %s, %s, %s)
 				"""
-			mycursor.execute(query, (myjwtx["name"], myjwtx["country"], data["message"],))
+			mycursor.execute(query, (myjwtx["name"], myjwtx["country"], data["message"], data["latitude"], data["longitude"],))
 			mydb.commit()
 			
 			return JSONResponse(status_code=200, content={
 					"name": myjwtx["name"], 
 					"country": myjwtx["country"], 
-					"message": data["message"]})
+					"message": data["message"],
+					"latitude": data["latitude"],
+					"longitude": data["longitude"]})
+
 
 
 
