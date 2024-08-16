@@ -16,6 +16,8 @@ from fastapi import FastAPI, File, UploadFile
 # 用 Python 管理 AWS 資源 (例如：S3)
 import boto3
 from botocore.exceptions import NoCredentialsError
+# 隨機
+import random
 # 使用 ORM 框架
 # pip install SQLAlchemy
 # from sqlalchemy import create_engine
@@ -119,13 +121,26 @@ async def add_postcards(request: Request):
 
 		print("Print Received data:", data)
 
-		# 將資料存到 POSTCARDS DB
+		# 將資料存到資料庫
 		with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
+
+			# 寫入 POSTCARDS
 			query = """
 				INSERT INTO postcards (mailFrom, country, message, latitude, longitude)
 				VALUES (%s, %s, %s, %s, %s)
 				"""
 			mycursor.execute(query, (myjwtx["name"], myjwtx["country"], data["message"], data["latitude"], data["longitude"],))
+
+			# 獲取最後插入資料自動產生的 ID
+			postcard_id = mycursor.lastrowid
+
+			# 寫入 POSTCARD_QUEUE ( 怎麼拿到POSTCARD_ID ?)
+			query2 = """
+				INSERT INTO postcard_queue (postcardID, mailFrom, country)
+				VALUES (%s, %s, %s)
+				"""
+			mycursor.execute(query2, (postcard_id, myjwtx["name"], myjwtx["country"],))
+
 			mydb.commit()
 			
 			return JSONResponse(status_code=200, content={
@@ -137,6 +152,63 @@ async def add_postcards(request: Request):
 
 
 
+# 隨機配對，然後將配對結果回填到資料庫
+@app.get("/api/matching", response_class=JSONResponse)
+# @app.put("/api/matching", response_class=JSONResponse)
+async def random_matching(request: Request):
+	#print (data)
+	with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
+		query = """
+			SELECT postcardID, mailFrom, country
+			FROM postcard_queue 
+			"""
+		mycursor.execute(query, )
+		results = mycursor.fetchall()
+		
+
+		# 淺拷貝。這樣我們可以在不改變原始資料的情況下進行配對操作
+		unpaired_data = results[:]
+		# 隨機打亂資料順序
+		random.shuffle(unpaired_data)
+
+
+		# 存儲配對結果
+		pairs = []
+
+		# 存儲未配對資料
+		unpaired_leftovers = []
+
+
+		# while 循環會持續執行，直到 unpaired_data 中的所有資料都被處理完
+		while unpaired_data:
+			# pop(0) 將列表的第一個元素取出並從列表中刪除，這樣 unpaired_data 會隨著每次循環減少一個元素
+			current = unpaired_data.pop(0)
+			paired = None
+
+			# 查找配對對象
+			for i in range(len(unpaired_data)):
+				candidate = unpaired_data[i]
+				print(f"step 1 {candidate}")  
+				if candidate['mailFrom'] != current['mailFrom']:
+					paired = candidate
+					print(f"step 2: Found pair {paired}")  # Debugging: 顯示找到的配對對象
+					unpaired_data.pop(i)
+					print(f"step 3: Remaining data {unpaired_data}")  # Debugging: 顯示剩餘的未配對數據  
+					break
+
+			# 如果找到配對，將其添加到配對結果中
+			if paired:
+				pairs.append((current['postcardID'], paired['postcardID']))
+				print(f"step 4: Current pairs {pairs}")  # Debugging: 顯示當前配對結果
+
+			else:
+				# 如果沒有找到配對，將 current 加入未配對列表
+				unpaired_leftovers.append(current)
+
+		# print(f"無法配對：{unpaired_leftovers}")
+		# print(f"已配對：{pairs}")
+
+		
 
 # 登入會員資訊
 @app.get("/api/user/auth", response_class=JSONResponse)
