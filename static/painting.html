@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JointJS Whiteboard Example</title>
+    <title>繪圖</title>
 	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.4.0/backbone-min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jointjs/3.6.1/joint.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jointjs/3.6.1/joint.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jointjs/3.6.1/joint.min.css">
+    <link rel="stylesheet" href="/static/printing.css">
     <style>
         #paper {
             width: 100%;
@@ -23,6 +25,7 @@
     <button id="add-text">Add Text</button>
     <button id="add-image">Add Image</button>
 	<input type="file" id="upload-image" accept="image/*">
+    <button id="save">Save</button>
 
     <script src="static/painting.js"></script>
 </body>

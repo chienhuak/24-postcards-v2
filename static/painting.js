@@ -180,3 +180,24 @@ const ResizeTool = joint.elementTools.Control.extend({
     }
 });
 
+
+// 上傳圖片到 AWS
+document.getElementById('save').addEventListener('click', function() {
+    html2canvas(document.querySelector("#paper")).then(canvas => {
+        canvas.toBlob(function(blob) {
+            var formData = new FormData();
+            formData.append('canvas_image', blob, 'canvas-image.png');
+
+            fetch('/api/saveCanvas', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer YOUR_JWT_TOKEN' // 替换为实际的 JWT token
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => console.log('Save success:', data))
+            .catch(error => console.error('Save error:', error));
+        });
+    });
+});
