@@ -58,8 +58,8 @@ $(document).ready(function() {
 		// 從 localStorage 獲取 JWT
 		const token = localStorage.getItem('token')
 
-		// 取得圖片網誌
-		let imglink = saveCanvas();
+		let imglink = await saveCanvas();
+		// console.log(imglink);
 		if (!imglink) {
 			alert("圖片存檔失敗！");
 			console.log("圖片存檔失敗！");
@@ -87,7 +87,6 @@ $(document).ready(function() {
 
 		// 等待地理定位结果
 		const { latitude: locLatitude, longitude: locLongitude } = await getLocation();
-
 
 		// var formData = new FormData(form);  // 使用傳入的表單
 
@@ -128,34 +127,36 @@ $(document).ready(function() {
 	newAction();
   
   });
-  
 
 
-function saveCanvas() {
-	// 從 localStorage 獲取 JWT
-	const token = localStorage.getItem('token')
 
+async function saveCanvas() {
+    // 從 localStorage 獲取 JWT
+    const token = localStorage.getItem('token');
 
-		html2canvas(document.querySelector("#paper")).then(canvas => {
-			canvas.toBlob(function(blob) {
-				var formData = new FormData();
-				formData.append('canvas_image', blob, 'canvas-image.png');
-	
-				fetch('/api/saveCanvas', {
-					method: 'POST',
-					headers: {
-						'Authorization': `Bearer ${token}`
-					},
-					body: formData
-				})
-				.then(data => {
-					console.log("Upload to S3 ok:", data);
-					return data.img_link;
-				  })
-				  .catch(error => {
-					console.error("Form submission failed:", error);
-					return null;
-				  });
-				})
-			})
+    try {
+        const canvas = await html2canvas(document.querySelector("#paper"));
+        const blob = await new Promise((resolve, reject) => {
+            canvas.toBlob(resolve, "image/png");
+        });
+
+        const formData = new FormData();
+        formData.append('canvas_image', blob, 'canvas-image.png');
+
+        const response = await fetch('/api/saveCanvas', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+        console.log("Upload to S3 ok:", data);
+        return data.img_link;
+
+    } catch (error) {
+        console.error("Error saving canvas:", error);
+        return null;
+    }
 }

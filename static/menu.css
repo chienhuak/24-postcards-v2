@@ -34,4 +34,5 @@
 
 .ui-dialog {
 	z-index: 1000 !important;
+	width : 850px !important;
 }

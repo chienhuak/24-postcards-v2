@@ -118,10 +118,10 @@ async def add_postcards(request: Request):
 
 			# 寫入 POSTCARDS
 			query = """
-				INSERT INTO postcards (mailFrom, country, message, latitude, longitude)
-				VALUES (%s, %s, %s, %s, %s)
+				INSERT INTO postcards (mailFrom, country, message, latitude, longitude, image)
+				VALUES (%s, %s, %s, %s, %s, %s)
 				"""
-			mycursor.execute(query, (myjwtx["name"], myjwtx["country"], data["message"], data["latitude"], data["longitude"],))
+			mycursor.execute(query, (myjwtx["name"], myjwtx["country"], data["message"], data["latitude"], data["longitude"], data["imglink"],))
 
 			# 獲取最後插入資料自動產生的 ID
 			postcard_id = mycursor.lastrowid
