@@ -23,18 +23,24 @@ var paper = new joint.dia.Paper({
 // text.addTo(graph);
 
 
-var resizableElement;
+var lastElement;
+var selectedElement;
 
 paper.on('element:pointerclick', function(elementView) {
     var element = elementView.model;
+    selectedElement = elementView.model;
     
     if (element.isElement()) {
         var type = element.get('type');
 
+
         // 只將工具加在編輯中的元素上
-        if (resizableElement) {
-            resizableElement.findView(paper).removeTools();
-            resizableElement = null;
+        if (lastElement) {
+            try {lastElement.findView(paper).removeTools();
+              } catch (error) {
+                console.error(error)
+              }
+            lastElement = null;
         }
         
         if (type === 'standard.TextBlock') {
@@ -57,12 +63,22 @@ paper.on('element:pointerclick', function(elementView) {
                 })
             );
 
-            resizableElement = element;
+            lastElement = element;
 
         }
     }
 });
 
+
+// 刪除
+document.addEventListener('keyup', function(evt) {
+    if (!selectedElement) return;
+    if (evt.code === 'Backspace' || evt.code === 'Delete') {
+        selectedElement.remove();
+        selectedElement = null;
+        lastElement = null;
+    }
+}, false);
 
 
 // 按鈕事件綁定
@@ -82,14 +98,14 @@ function addText() {
 
 function addImage() {
     var image = new joint.shapes.standard.Image();
-    image.position(200, 50);
-    image.resize(100, 100);
+    image.position(10, 10);
+    image.resize(550, 380);
     image.attr({
         body: {
             fill: 'transparent'
         },
         image: {
-            xlinkHref: 'https://via.placeholder.com/100'
+            xlinkHref: 'https://via.placeholder.com/550X380'
         }
     });
     image.addTo(graph);
@@ -163,3 +179,4 @@ const ResizeTool = joint.elementTools.Control.extend({
         );
     }
 });
+
