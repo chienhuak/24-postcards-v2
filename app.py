@@ -208,6 +208,32 @@ async def random_matching(request: Request):
 		# print(f"無法配對：{unpaired_leftovers}")
 		# print(f"已配對：{pairs}")
 
+		for i in pairs :
+			query1 = """
+				UPDATE postcards a
+				inner join postcards b on b.postcardID = %s
+				SET a.mailTo = b.mailFrom
+				WHERE a.postcardID = %s
+				"""
+			query2 = """
+				UPDATE postcards a
+				inner join postcards b on b.postcardID = %s
+				SET a.mailTo = b.mailFrom
+				WHERE a.postcardID = %s
+				"""
+			query3 = """
+				DELETE FROM postcard_queue
+				WHERE postcardID in (%s,%s)
+				"""
+			mycursor.execute(query1, (i[0],i[1]))
+			mycursor.execute(query2, (i[1],i[0]))
+			mycursor.execute(query3, (i[1],i[0]))
+
+		mydb.commit()
+		return {
+			"ok": True
+			} 
+
 		
 
 # 登入會員資訊
