@@ -58,13 +58,18 @@ $(document).ready(function() {
 		// 從 localStorage 獲取 JWT
 		const token = localStorage.getItem('token')
 
-		// 預設經緯度為 null
-		let latitude = null;
-		let longitude = null;
+		// 取得圖片網誌
+		let imglink = saveCanvas();
+		if (!imglink) {
+			alert("圖片存檔失敗！");
+			console.log("圖片存檔失敗！");
+			return;
+		}
+
 
 		// Promise
 		const getLocation = () => new Promise((resolve, reject) => {
-			// 檢查瀏覽器是否支持地理定位 
+			// 檢查瀏覽器是否支援地理定位 
 			if (navigator.geolocation) {
 				console.log("取得瀏覽器定位")
 				navigator.geolocation.getCurrentPosition(position => {
@@ -82,8 +87,7 @@ $(document).ready(function() {
 
 		// 等待地理定位结果
 		const { latitude: locLatitude, longitude: locLongitude } = await getLocation();
-		latitude = locLatitude;
-		longitude = locLongitude;
+
 
 		// var formData = new FormData(form);  // 使用傳入的表單
 
@@ -92,11 +96,13 @@ $(document).ready(function() {
 			// mailFrom: $('#mailFrom').val(),
 			// country: $('#country-select').val(),
 			message: $('#tab_title').val(),
-			latitude : latitude,
-			longitude : longitude
+			latitude : locLatitude,
+			longitude : locLongitude,
+			imglink : imglink
 		};
 
 		console.log(jsonformData)
+
 
 		fetch("/api/postcards", {
 			headers: {
@@ -123,3 +129,33 @@ $(document).ready(function() {
   
   });
   
+
+
+function saveCanvas() {
+	// 從 localStorage 獲取 JWT
+	const token = localStorage.getItem('token')
+
+
+		html2canvas(document.querySelector("#paper")).then(canvas => {
+			canvas.toBlob(function(blob) {
+				var formData = new FormData();
+				formData.append('canvas_image', blob, 'canvas-image.png');
+	
+				fetch('/api/saveCanvas', {
+					method: 'POST',
+					headers: {
+						'Authorization': `Bearer ${token}`
+					},
+					body: formData
+				})
+				.then(data => {
+					console.log("Upload to S3 ok:", data);
+					return data.img_link;
+				  })
+				  .catch(error => {
+					console.error("Form submission failed:", error);
+					return null;
+				  });
+				})
+			})
+}

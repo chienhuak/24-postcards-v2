@@ -422,16 +422,16 @@ async def feed(request: Request):
 # 將編輯完畢的明信片儲存到 S3
 @app.post("/api/saveCanvas", response_class=JSONResponse)
 async def saveCanvas(request: Request, canvas_image: Optional[UploadFile] = File(None)):  
-	# # 從 Authorization Header 中提取 token
-	# auth_header = request.headers.get('Authorization')
-	# if not auth_header:
-	# 	return RedirectResponse(url="/home", status_code=status.HTTP_303_SEE_OTHER)
+	# 從 Authorization Header 中提取 token
+	auth_header = request.headers.get('Authorization')
+	if not auth_header:
+		return RedirectResponse(url="/home", status_code=status.HTTP_303_SEE_OTHER)
 
-	# else:
-	# 	myjwt = auth_header.split(" ")[1] 
+	else:
+		myjwt = auth_header.split(" ")[1] 
 
-	# 	# 解碼 JWT
-	# 	myjwtx = jwt.decode(myjwt,jwtkey,algorithms="HS256")
+		# 解碼 JWT
+		myjwtx = jwt.decode(myjwt,jwtkey,algorithms="HS256")
 
 		
 		img_link = None
@@ -442,59 +442,8 @@ async def saveCanvas(request: Request, canvas_image: Optional[UploadFile] = File
 			s3_key = f"{unique_name}"
 			s3_client.upload_fileobj(canvas_image.file, AWS_BUCKET_NAME, s3_key)
 			img_link = f"https://d3637x49yyjgf.cloudfront.net/{s3_key}"
-			# img_link = f"https://s3.{AWS_REGION}.amazonaws.com/{AWS_BUCKET_NAME}/{s3_key}"
 
-
-		# with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
-		# 	query = "INSERT INTO message (member_id, content, img_link) VALUES (%s, %s, %s)"
-		# 	inputs = (myjwtx['id'], say, img_link)
-		# 	mycursor.execute(query, inputs)
-
-		# 	# 提交事務
-		# 	mydb.commit()
-
+		print("img_link")
 		return {"message": "File uploaded successfully", "img_link": img_link}
 
 
-
-
-
-
-# # 我的明信片
-# @app.get("/api/collections", response_class=JSONResponse)
-# async def collections(request: Request, page:Optional[int]=0,keyword:Optional[str]=""):
-# 	if page < 0:
-# 		return JSONResponse(status_code=500, content={
-# 			"error": True,
-# 			"message": "頁數錯誤"
-# 			}) 
-
-# 	with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
-
-# 		# 每頁顯示12條留言
-# 		page_size = 12
-
-# 		query = """
-# 		SELECT id, name, CAT as category, description, address, direction as transport, mrt, latitude as lat, longitude as lng, file as images
-# 		FROM attractions 
-# 		WHERE (mrt = %s OR name like %s) 
-# 		ORDER BY id
-# 		LIMIT %s OFFSET %s
-# 		"""
-# 		mycursor.execute(query, (keyword, '%'+keyword+'%', page_size, page_size*page))
-# 		results = mycursor.fetchall()
-# 		with mydb.cursor(buffered=True) as mycursor2 :
-# 			for result in results:
-# 				query = """
-# 				SELECT url
-# 				FROM urls 
-# 				WHERE id = %s AND (url like '%.jpg' OR url like '%.png')
-# 				"""
-# 				mycursor2.execute(query, (result['id'],))
-# 				results2 = mycursor2.fetchall()
-# 				url_list = [x[0] for x in results2]
-# 				result['images'] = url_list
-
-# 	return {
-# 		"nextPage": page+1 if len(results) == 12 else None,
-# 		"data": results}

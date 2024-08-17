@@ -20,6 +20,22 @@
   <!-- 引入 Font Awesome 的 CSS 文件 -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 
+  <!-- 畫布用 -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.4.0/backbone-min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jointjs/3.6.1/joint.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jointjs/3.6.1/joint.min.css">
+
+  <style>
+    #paper {
+        width: 100%;
+        height: 600px;
+        border: 1px solid #ccc;
+    }
+</style>
 </head>
 <body>
   <div class="overlay" id="overlay"></div>
@@ -66,6 +82,11 @@
 
   <!-- 寄送明信片編輯框 -->
   <div id="dialog" title="編輯中...">
+    <div id="paper"></div>
+    <button id="add-text">Add Text</button>
+    <button id="add-image">Add Image</button>
+	  <input type="file" id="upload-image" accept="image/*">
+    <button id="save">Save</button>
     <form>
       <fieldset class="ui-helper-reset">
       <label for="img_upload">Photo</label>
@@ -97,12 +118,14 @@
   <footer class="footer">Copyright 	&#169;  Project-July</footer>
 
   <script src="/static/auth.js"></script>
+  <script src="static/painting.js"></script>
 
     <!-- jQuery first -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
     <script src="/static/menu.js"></script>
+    <!-- <script src="/static/postcards.js"></script> -->
     <script>
       document.addEventListener('DOMContentLoaded', function(){
         checkLoginStatus()
