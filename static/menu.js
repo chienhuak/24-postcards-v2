@@ -46,9 +46,16 @@ $(document).ready(function() {
 	  // Open dialog on button click
 	  $( "#action_btn" )
 		//.button()
-		.on( "click", function() {
-		  dialog.dialog( "open" );
-		  console.log('dialog open');
+		.on( "click", async function() {
+
+			const isLoggedIn = await checkLoginStatus();
+		  
+			if (isLoggedIn) {
+				dialog.dialog("open");
+				console.log('dialog open');
+			} else {
+				alert("請先註冊或登入，才可以使用寄信功能！");
+			}
 		});
 	}
 

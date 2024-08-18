@@ -203,10 +203,12 @@ async function checkLoginStatus() {
         console.log('checkLoginStatus signin..')
         signoutBtn.style.display = "inline-block"
         signinBtn.style.display = "none"
+        return true
     } else {
         console.log('checkLoginStatus signout..')
         signoutBtn.style.display = "none"
         signinBtn.style.display = "inline-block"
+        return false
     }
 }
 
