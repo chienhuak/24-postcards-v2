@@ -74,9 +74,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-@app.get("/collections", include_in_schema=False)
-async def index(request: Request):
-	return FileResponse("./static/index.html", media_type="text/html")
+
 @app.get("/home", include_in_schema=False)
 async def home(request: Request):
 	return FileResponse("./static/home.html", media_type="text/html")
@@ -87,6 +85,10 @@ async def feed(request: Request):
 @app.get("/countries.json", include_in_schema=False)
 async def feed(request: Request):
 	return FileResponse("./static/countries.json", media_type="application/json")
+
+@app.get("/collections", include_in_schema=False)
+async def collections(request: Request):
+	return FileResponse("./static/collections.html", media_type="text/html")
 
 
 @app.get("/painting", include_in_schema=False)
@@ -447,3 +449,41 @@ async def saveCanvas(request: Request, canvas_image: Optional[UploadFile] = File
 		return {"message": "File uploaded successfully", "img_link": img_link}
 
 
+
+# 我收到的明信片
+@app.get("/api/collections", response_class=JSONResponse)
+async def collections(request: Request, page:Optional[int]=0,keyword:Optional[str]=""):
+
+	# 從 Authorization Header 中提取 token
+	auth_header = request.headers.get('Authorization')
+	if auth_header:
+		myjwt = auth_header.split(" ")[1] 
+
+		# 解碼 JWT
+		myjwtx = jwt.decode(myjwt,jwtkey,algorithms="HS256")
+
+	if page < 0:
+		return JSONResponse(status_code=500, content={
+			"error": True,
+			"message": "頁數錯誤"
+			}) 
+
+	with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
+
+		# 每頁顯示12條留言
+		page_size = 12
+
+		query = """
+		SELECT *
+		FROM postcards 
+		WHERE (mailto = %s) 
+		ORDER BY postcardid desc
+		LIMIT %s OFFSET %s
+		"""
+		# mycursor.execute(query, (keyword, '%'+keyword+'%', page_size, page_size*page))   # 關鍵字搜尋
+		mycursor.execute(query, (myjwtx["name"], page_size, page_size*page))
+		results = mycursor.fetchall()
+
+	return {
+		"nextPage": page+1 if len(results) == 12 else None,
+		"data": results}
