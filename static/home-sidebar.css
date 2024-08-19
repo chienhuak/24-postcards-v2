@@ -5,26 +5,40 @@
 	position: fixed;
 	top: 0;
 	left: 0;
-	background-color: #111;
+	background-color: #f7e7e7;
 	overflow-x: hidden;
 	transition: 0.5s;
 	padding-top: 60px;
 	z-index: 10000;
 	}
 
-	/* Sidebar links */
-	.sidebar a {
+/* Sidebar links */
+.sidebar a {
 	padding: 10px 15px;
 	text-decoration: none;
 	font-size: 18px;
 	color: #818181;
 	display: block;
 	transition: 0.3s;
+	border : solid pink 0.5;
 	}
 
-	.sidebar a:hover {
+
+/* Sidebar links hover effect */
+.sidebar a:hover {
+	color: #f1f1f1; /* Change text color on hover */
+	background-color:  #b17474;
+}
+
+.sidebar span:hover {
 	color: #f1f1f1;
-	}
+}
+
+
+/* Optional: Ensure span does not interfere with link hover */
+.sidebar span {
+	color: inherit; /* Inherit color from parent <a> */
+}
 
 /* Close button */
 .sidebar .closebtn {
