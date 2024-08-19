@@ -1,0 +1,44 @@
+/* Sidebar container */
+.sidebar {
+	height: 100%;
+	width: 0;
+	position: fixed;
+	top: 0;
+	left: 0;
+	background-color: #111;
+	overflow-x: hidden;
+	transition: 0.5s;
+	padding-top: 60px;
+	z-index: 10000;
+	}
+
+	/* Sidebar links */
+	.sidebar a {
+	padding: 10px 15px;
+	text-decoration: none;
+	font-size: 18px;
+	color: #818181;
+	display: block;
+	transition: 0.3s;
+	}
+
+	.sidebar a:hover {
+	color: #f1f1f1;
+	}
+
+/* Close button */
+.sidebar .closebtn {
+	position: absolute;
+	top: 0;
+	right: 25px;
+	font-size: 36px;
+	margin-left: 50px;
+}
+
+/* Open button (toggle button) */
+#toggle-btn {
+	font-size: 24px;
+	cursor: pointer;
+	color: #111;
+	padding: 10px 20px;
+}
