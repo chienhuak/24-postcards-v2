@@ -47,8 +47,8 @@ const point = new THREE.Mesh(
 
 
 // 澳洲 -37.901918, 145.051624
-const latitude = (-37.901918 / 180) * Math.PI
-const longitude = (145.051624 / 180) * Math.PI
+const latitude = ( -37.901918 / 180) * Math.PI
+const longitude = (-145.051624 / 180) * Math.PI
 const radius = 5
 console.log({latitude, longitude})
 const x = radius * Math.cos(latitude) * Math.sin(longitude)
@@ -59,7 +59,11 @@ console.log({x, y, z})
 point.position.x = x
 point.position.y = y
 point.position.z = z
-group.add(point)
+// 讓地標跟著地球旋轉
+earth.add(point)
+
+console.log(earth.position)
+console.log(point.position)
 
 
 // 創建飛機模型
@@ -89,8 +93,8 @@ function animate() {
 	if (mouse.x !== undefined) {
 		// group.rotation.y = mouse.x * 0.5;
 		gsap.to(group.rotation,{
-		x: mouse.y * 0.3,
-		y: mouse.x * 0.3,
+		// x: mouse.y * 1,   // 上下旋轉
+		y: mouse.x * 1,   // 水平旋轉
 		duration: 2
 	})
 	}
@@ -100,9 +104,9 @@ function animate() {
 animate()
 
 
-addEventListener('mousemove',() => {
+addEventListener('mousemove',(event) => {
 	mouse.x = (event.clientX / innerWidth) * 2 - 1
 	mouse.y = (event.clientY / innerHeight) * 2 + 1
-	console.log(mouse)
+	// console.log(mouse)
 })
 
