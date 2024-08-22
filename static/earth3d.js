@@ -39,15 +39,18 @@ scene.add(group)
 
 
 
-function coordinatePoint(lat,lng) {
+function coordinatePoint(lat,lng,imageUrl) {
 
 	// 創建座標
 	const point = new THREE.Mesh(
-		new THREE.SphereGeometry(0.1, 32, 32),
+		// new THREE.SphereGeometry(0.1, 32, 32),
+		new THREE.CircleGeometry(0.1),
 		new THREE.MeshBasicMaterial({
 			color: '#ff0000'
 		})
 	)
+
+
 
 	// 澳洲 -37.901918, -145.051624
 	const latitude = (lat / 180) * Math.PI
@@ -59,10 +62,29 @@ function coordinatePoint(lat,lng) {
 	const z = radius * Math.cos(latitude) * Math.cos(longitude)
 	console.log({x, y, z})
 
+	// Marker
+	const marker = new THREE.Mesh(
+		new THREE.PlaneGeometry(1, 1.3),
+		new THREE.MeshBasicMaterial({
+			map: new THREE.TextureLoader().load(imageUrl),
+			transparent: true,
+			side: THREE.DoubleSide
+		})
+	)
+	marker.position.set(x * 1.1 ,y * 1.1 ,z * 1.1 ) 
+
+	// 讓明信片水平顯示
+	const direction = new THREE.Vector3(x, y, z).normalize()
+	const up = new THREE.Vector3(0, 0, 1)
+	marker.quaternion.setFromUnitVectors(up, direction)
+
+	earth.add(marker)
+
 	point.position.x = x
 	point.position.y = y
 	point.position.z = z
 	// 讓地標跟著地球旋轉
+	point.quaternion.setFromUnitVectors(up, direction)
 	earth.add(point)
 
 	// console.log(earth.position)
@@ -70,12 +92,13 @@ function coordinatePoint(lat,lng) {
 }
 
 
-// 0°經線和0°緯線
+// 開始轉的地方
 earth.rotation.y = Math.PI / 3
 earth.rotation.x = Math.PI / 10
-// coordinatePoint(-25.0002052,144.051624)  // 澳洲
-coordinatePoint(25.0002052,121.3005753)  // 台灣
-// coordinatePoint(0,0)  
+coordinatePoint(-25.0002052,144.051624,'./static/image/postcard_template.png')  // 澳洲
+coordinatePoint(25.0002052,121.3005753,'./static/image/postcard_template.png')  // 台灣
+// 0°經線和0°緯線
+coordinatePoint(0,0,'./static/image/postcard_template.png')  
 
 
 // 創建飛機模型
