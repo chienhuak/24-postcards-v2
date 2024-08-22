@@ -157,3 +157,27 @@ addEventListener('mousemove',(event) => {
 	}
 })
 
+
+function map_marker() {
+
+    const token = localStorage.getItem('token')
+
+    fetch('/api/collections', {
+        method: 'GET',
+        headers: {'Authorization': `Bearer ${token}`}
+    })
+        .then(response => response.json())
+        .then(data => {
+
+			console.log(data)
+
+            for (let i=0;i<data.data.length;i++){
+				coordinatePoint(data.data[i].latitude, data.data[i].longitude, data.data[i].image)  
+            }
+            nextPage = data.nextPage
+        })
+        .catch(error => {
+            console.error('Error:', error)
+        })
+}
+
