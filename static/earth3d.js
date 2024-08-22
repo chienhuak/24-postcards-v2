@@ -158,6 +158,34 @@ addEventListener('mousemove',(event) => {
 })
 
 
+// 監聽 scroll 動作，並進行 zoom in / zoom out
+const minZoom = 7
+const maxZoom = 12
+let zoomSpeed = 0.1 // 控制縮放速度
+let targetZoom = camera.position.z
+let throttleTimeout;
+const throttleDelay = 50; // 設置截流延遲（毫秒）
+
+addEventListener('wheel', (event) => {
+    if (throttleTimeout) clearTimeout(throttleTimeout)
+    throttleTimeout = setTimeout(() => {
+        let zoomChange = event.deltaY * zoomSpeed
+        targetZoom += zoomChange
+
+        targetZoom = Math.max(minZoom, Math.min(maxZoom, targetZoom))
+
+        gsap.to(camera.position, {
+            z: targetZoom,
+            duration: 0.5,
+            ease: "power2.out"
+        })
+
+        event.preventDefault()
+    }, throttleDelay)
+}, { passive: false })
+
+
+// 動態建立明信片
 function map_marker() {
 
     const token = localStorage.getItem('token')
