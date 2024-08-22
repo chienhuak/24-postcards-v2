@@ -11,7 +11,7 @@ scene.background = new THREE.Color(0x000000); // 設置背景顏色
 // 創建地球模型
 const geometry = new THREE.SphereGeometry(5, 32, 32)
 const textureLoader = new THREE.TextureLoader()
-const earthTexture = textureLoader.load('./static/image/earth.jpg')
+const earthTexture = textureLoader.load('./static/image/nasa.jpg')
 const material = new THREE.MeshBasicMaterial({ map: earthTexture })
 const earth = new THREE.Mesh(geometry, material)
 scene.add(earth)
@@ -37,33 +37,44 @@ group.add(earth)
 scene.add(group)
 
 
-// 創建座標
-const point = new THREE.Mesh(
-	new THREE.SphereGeometry(0.1, 32, 32),
-	new THREE.MeshBasicMaterial({
-		color: '#ff0000'
-	})
-)
 
 
-// 澳洲 -37.901918, 145.051624
-const latitude = ( -37.901918 / 180) * Math.PI
-const longitude = (-145.051624 / 180) * Math.PI
-const radius = 5
-console.log({latitude, longitude})
-const x = radius * Math.cos(latitude) * Math.sin(longitude)
-const y = radius * Math.sin(latitude)
-const z = radius * Math.cos(latitude) * Math.cos(longitude)
-console.log({x, y, z})
+function coordinatePoint(lat,lng) {
 
-point.position.x = x
-point.position.y = y
-point.position.z = z
-// 讓地標跟著地球旋轉
-earth.add(point)
+	// 創建座標
+	const point = new THREE.Mesh(
+		new THREE.SphereGeometry(0.1, 32, 32),
+		new THREE.MeshBasicMaterial({
+			color: '#ff0000'
+		})
+	)
 
-console.log(earth.position)
-console.log(point.position)
+	// 澳洲 -37.901918, -145.051624
+	const latitude = ( lat / 180) * Math.PI
+	const longitude = (lng / 180) * Math.PI
+	const radius = 5
+	// console.log({latitude, longitude})
+	const x = radius * Math.cos(latitude) * Math.sin(longitude)
+	const y = radius * Math.sin(latitude)
+	const z = radius * Math.cos(latitude) * Math.cos(longitude)
+	// console.log({x, y, z})
+
+	point.position.x = x
+	point.position.y = y
+	point.position.z = z
+	// 讓地標跟著地球旋轉
+	earth.add(point)
+
+	// console.log(earth.position)
+	// console.log(point.position)
+}
+
+
+// 0°經線和0°緯線
+// earth.rotation.y = Math.PI / 10
+coordinatePoint(-37.901918,-145.051624)  // 澳洲
+coordinatePoint(-27.901918,144.051624)  // 澳洲
+coordinatePoint(25.0002052,121.3005753)  // 台灣
 
 
 // 創建飛機模型
