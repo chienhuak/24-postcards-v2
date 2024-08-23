@@ -1,3 +1,5 @@
+import { GLTFLoader } from "https://cdn.skypack.dev/three-stdlib@2.8.5/loaders/GLTFLoader"
+
 // 創建場景、相機和渲染器
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);  // 參數：相機視野、螢幕長寬比、可渲染物體最近的距離、可渲染物體最遠的距離
@@ -94,7 +96,7 @@ function coordinatePoint(lat,lng,imageUrl) {
 
 // 開始轉的地方
 earth.rotation.y = Math.PI / 3
-earth.rotation.x = Math.PI / 10
+// earth.rotation.x = Math.PI / 10
 coordinatePoint(-25.0002052,144.051624,'./static/image/postcard_template.png')  // 澳洲
 coordinatePoint(25.0002052,121.3005753,'./static/image/postcard_template.png')  // 台灣
 // 0°經線和0°緯線
@@ -102,10 +104,14 @@ coordinatePoint(0,0,'./static/image/postcard_template.png')
 
 
 // 創建飛機模型
-const planeGeometry = new THREE.BoxGeometry(0.5, 0.1, 0.1);
-const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-scene.add(plane);
+// const planeGeometry = new THREE.BoxGeometry(0.5, 0.1, 0.1);
+// const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+// const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+// scene.add(plane);
+
+let plane = (await new GLTFLoader().loadAsync("static/assets/plane/scene.glb")).scene.children[0]
+plane.scale.set(0.001, 0.001, 0.001)
+scene.add(plane)
 
 
 const mouse = {
@@ -119,8 +125,10 @@ function animate() {
 	earth.rotation.y += 0.001; // 地球轉速
 	
 	// 設置飛機的繞地球路徑
-	plane.position.x = 6 * Math.cos(Date.now() * 0.001)
-	plane.position.z = 6 * Math.sin(Date.now() * 0.001)
+	if (plane) {
+		plane.position.x = 6 * Math.cos(Date.now() * 0.001)
+		plane.position.z = 6 * Math.sin(Date.now() * 0.001)
+	}
 
 	renderer.render(scene, camera)
 
