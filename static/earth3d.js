@@ -38,10 +38,17 @@ const group = new THREE.Group()
 group.add(earth)
 scene.add(group)
 
+// 做飛機
+let plane = (await new GLTFLoader().loadAsync("static/assets/plane/scene.glb")).scene.children[0]
+console.log("plane :",plane)
+let textures = { // 使用TextureLoader載入飛機尾跡的遮罩
+	planeTrailMask: await new THREE.TextureLoader().loadAsync("static/assets/mask.png"),
+  }
+let planesData = []
 
 
-
-function coordinatePoint(lat,lng,imageUrl) {
+// 做座標
+async function coordinatePoint(lat,lng,imageUrl) {
 
 	// 創建座標
 	const point = new THREE.Mesh(
@@ -66,7 +73,7 @@ function coordinatePoint(lat,lng,imageUrl) {
 
 	// Marker
 	const marker = new THREE.Mesh(
-		new THREE.PlaneGeometry(1, 1.3),
+		new THREE.PlaneGeometry(1.5, 1),
 		new THREE.MeshBasicMaterial({
 			map: new THREE.TextureLoader().load(imageUrl),
 			transparent: true,
@@ -91,6 +98,36 @@ function coordinatePoint(lat,lng,imageUrl) {
 
 	// console.log(earth.position)
 	console.log(point.position)
+
+	planesData.push(makePlane(plane, textures.planeTrailMask))
+}
+
+function nr() { // 返回-1到1之間的隨機數
+	return Math.random() * 2 - 1;
+  }
+
+
+function makePlane(planeMesh, trailTexture) {
+	let plane = planeMesh.clone();
+	plane.scale.set(0.0005, 0.0005, 0.0005)
+	// earth.add(plane)
+	// plane.position.set(x * 1.2 ,y * 1.2 ,z * 1.2) 
+	// const plane_up = new THREE.Vector3(0,0,-1)
+	// plane.quaternion.setFromUnitVectors(plane_up, direction)
+	// planes.push(plane)
+
+	let plane_group = new THREE.Group();
+	plane_group.add(plane);
+	earth.add(plane_group);
+
+	return {
+		group: plane_group,
+		yOff: 5.2 + Math.random() * 1.0,
+		rot: Math.PI * 2,  // just to set a random starting point
+		rad: Math.random() * Math.PI * 0.45 + Math.PI * 0.05,
+		randomAxis: new THREE.Vector3(nr(), nr(), nr()).normalize(),
+		randomAxisRot: Math.random() * Math.PI * 1.2,
+	}
 }
 
 
@@ -101,17 +138,11 @@ coordinatePoint(-25.0002052,144.051624,'./static/image/postcard_template.png')  
 coordinatePoint(25.0002052,121.3005753,'./static/image/postcard_template.png')  // 台灣
 // 0°經線和0°緯線
 coordinatePoint(0,0,'./static/image/postcard_template.png')  
+// console.log(planesData)
 
-
-// 創建飛機模型
-// const planeGeometry = new THREE.BoxGeometry(0.5, 0.1, 0.1);
-// const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-// const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-// scene.add(plane);
-
-let plane = (await new GLTFLoader().loadAsync("static/assets/plane/scene.glb")).scene.children[0]
-plane.scale.set(0.001, 0.001, 0.001)
-scene.add(plane)
+// 白色環境光
+const ambientLight = new THREE.AmbientLight(0xffffff, 2); 
+scene.add(ambientLight)
 
 
 const mouse = {
@@ -119,18 +150,36 @@ const mouse = {
 	y: undefined
 }
 
+
+let clock = new THREE.Clock();
+
+
 // 動畫循環與飛機移動
 function animate() {
 	requestAnimationFrame(animate)
 	earth.rotation.y += 0.001; // 地球轉速
 	
-	// 設置飛機的繞地球路徑
-	if (plane) {
-		plane.position.x = 6 * Math.cos(Date.now() * 0.001)
-		plane.position.z = 6 * Math.sin(Date.now() * 0.001)
-	}
 
-	renderer.render(scene, camera)
+	// 設置飛機的繞地球路徑
+	let delta = clock.getDelta();
+
+	if (planesData) {
+		planesData.forEach(planeData => {
+			let plane = planeData.group;
+			plane.position.set(0,0,0);
+			plane.rotation.set(0,0,0);
+			plane.updateMatrixWorld();
+			planeData.rot += delta * 0.25;
+			plane.rotateOnAxis(planeData.randomAxis, planeData.randomAxisRot); // random axis // 使飛機圍繞 planeData.randomAxis（一個隨機選定的軸）旋轉 planeData.randomAxisRot 弧度
+			plane.rotateOnAxis(new THREE.Vector3(0, 1, 0), planeData.rot);    // y-axis rotation // 使飛機圍繞 y 軸（即 new THREE.Vector3(0, 1, 0)）旋轉 planeData.rot 弧度
+			plane.rotateOnAxis(new THREE.Vector3(0, 0, 1), planeData.rad);    // this decides the radius
+			plane.translateY(planeData.yOff);
+			plane.rotateOnAxis(new THREE.Vector3(1,0,0), 2*Math.PI);
+		});
+	};
+
+	renderer.render(scene, camera);
+
 
 	// 用游標控制地球
 	if (mouse.x !== undefined) {
@@ -190,7 +239,7 @@ addEventListener('wheel', (event) => {
 
         event.preventDefault()
     }, throttleDelay)
-}, { passive: false })
+}, { passive: false });
 
 
 // 動態建立明信片
@@ -210,10 +259,48 @@ function map_marker() {
             for (let i=0;i<data.data.length;i++){
 				coordinatePoint(data.data[i].latitude, data.data[i].longitude, data.data[i].image)  
             }
-            nextPage = data.nextPage
+            // nextPage = data.nextPage
         })
         .catch(error => {
             console.error('Error:', error)
         })
 }
 
+map_marker()
+
+
+// // 載入大氣層 shader
+// // Failed to load module script: Expected a JavaScript module script but the server responded with a MIME type of "text/plain"
+// import atmosphereVertexShader from '/static/assets/shaders/atmosphereVertex.glsl'
+
+const atmosphereVertexShader = `
+varying vec3 vertexNormal;
+
+void main() {
+  vertexNormal = normalize(normalMatrix * normal);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 0.9 );
+}
+`
+
+const atmosphereFragmentShader = `
+varying vec3 vertexNormal; // (0, 0, 0)
+void main() {
+  float intensity = pow(0.75 - dot(vertexNormal, vec3(0, 0, 1.0)), 2.0);
+  gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity;
+}
+`
+
+// create atmosphere
+const atmosphere = new THREE.Mesh(
+	new THREE.SphereGeometry(5, 50, 50),
+	new THREE.ShaderMaterial({
+	  vertexShader: atmosphereVertexShader,
+	  fragmentShader: atmosphereFragmentShader,
+	  blending: THREE.AdditiveBlending,
+	  side: THREE.BackSide
+	})
+  )
+  
+  atmosphere.scale.set(1.1, 1.1, 1.1)
+  
+  scene.add(atmosphere)
