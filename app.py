@@ -95,6 +95,10 @@ async def collections(request: Request):
 async def feed(request: Request):
 	return FileResponse("./static/painting.html", media_type="text/html")
 
+@app.get("/earth3d", include_in_schema=False)
+async def feed(request: Request):
+	return FileResponse("./static/earth3d.html", media_type="text/html")
+
 
 # 新增明信片
 @app.post("/api/postcards", response_class=JSONResponse)

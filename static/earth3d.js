@@ -1,11 +1,24 @@
 import { GLTFLoader } from "https://cdn.skypack.dev/three-stdlib@2.8.5/loaders/GLTFLoader"
 
 // 創建場景、相機和渲染器
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);  // 參數：相機視野、螢幕長寬比、可渲染物體最近的距離、可渲染物體最遠的距離
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene()
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)  // 參數：相機視野、螢幕長寬比、可渲染物體最近的距離、可渲染物體最遠的距離
+const renderer = new THREE.WebGLRenderer()
+
+const mapid = document.getElementById('mapid')
+mapid.appendChild(renderer.domElement)
+
+function resize() {
+	const width = mapid.clientWidth
+	const height = mapid.clientHeight
+	renderer.setSize(width, height)
+	camera.aspect = width / height
+	camera.updateProjectionMatrix()
+}
+  
+window.addEventListener('resize', resize)
+resize()
+
 
 // 設置場景背景顏色
 scene.background = new THREE.Color(0x000000); // 設置背景顏色
@@ -218,7 +231,7 @@ addEventListener('mousemove',(event) => {
 // 監聽 scroll 動作，並進行 zoom in / zoom out
 const minZoom = 7
 const maxZoom = 12
-let zoomSpeed = 0.1 // 控制縮放速度
+let zoomSpeed = 0.01 // 控制縮放速度
 let targetZoom = camera.position.z
 let throttleTimeout;
 const throttleDelay = 50; // 設置截流延遲（毫秒）
