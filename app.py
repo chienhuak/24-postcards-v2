@@ -18,7 +18,7 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 # 隨機
 import random
-
+from typing import List  # 資料型別提示
 
 
 app=FastAPI(debug=True)
@@ -54,6 +54,39 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # 創建一個 HTTPBearer 的實例
 security = HTTPBearer()
+
+
+# WebSocket
+class ConnectionManager:
+	def __init__(self):
+		self.active_connections: List[WebSocket] = [] # 追蹤哪些客戶端是連線的
+
+	async def connect(self, websocket: WebSocket):
+		print("WS已連線")
+		await websocket.accept() # 當有新的WebSocket連線請求時調用connect(), 接受連線請求，並建立通信通道
+		self.active_connections.append(websocket) # 將新的WebSocket連線加到清單
+
+	def disconnect(self, websocket: WebSocket):
+		print("WS中斷連線")
+		self.active_connections.remove(websocket) # 將斷開的WebSocket連線從清單中移除
+
+	async def broadcast(self, message: str): # 向所有連線的WebSocket客戶端廣播訊息
+		print("WS廣播 to ",self.active_connections)
+		for connection in self.active_connections:
+			print("WS廣播中 ...",connection.application_state)
+			if [] :	#connection.application_state != WebSocketState.CONNECTED:
+				print("WS連線已中斷!!!")
+			else:
+				try :
+					await connection.send_text(message)
+				except WebSocketDisconnect :
+					manager.disconnect(connection)
+				except Exception as e :
+					print("WS廣播失敗",e)
+
+
+manager = ConnectionManager()
+
 
 # To get JWT token and decode JWT token
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
@@ -141,6 +174,8 @@ async def add_postcards(request: Request):
 
 			mydb.commit()
 			
+			await broadcast_queue_update([postcard_id,], 'add')
+
 			return JSONResponse(status_code=200, content={
 					"name": myjwtx["name"], 
 					"country": myjwtx["country"], 
@@ -205,6 +240,8 @@ async def random_matching(request: Request):
 		# print(f"無法配對：{unpaired_leftovers}")
 		# print(f"已配對：{pairs}")
 
+		broadcast_del_list = []
+
 		for i in pairs :
 			query1 = """
 				UPDATE postcards a
@@ -226,7 +263,13 @@ async def random_matching(request: Request):
 			mycursor.execute(query2, (i[1],i[0]))
 			mycursor.execute(query3, (i[1],i[0]))
 
+			broadcast_del_list.append(i[0])
+			broadcast_del_list.append(i[1])
+
 		mydb.commit()
+
+		broadcast_queue_update(broadcast_del_list, 'delete')
+
 		return {
 			"ok": True
 			} 
@@ -491,3 +534,69 @@ async def collections(request: Request, page:Optional[int]=0,keyword:Optional[st
 	return {
 		"nextPage": page+1 if len(results) == 12 else None,
 		"data": results}
+
+
+# @app.websocket("/ws")
+# async def websocket_endpoint(websocket: WebSocket):
+#     await manager.connect(websocket)
+#     try:
+#         while True:
+#             data = await websocket.receive_text()
+#             await manager.broadcast(data)
+#     except WebSocketDisconnect:
+#         manager.disconnect(websocket)
+
+
+"""
+1. A 連線 -> 收到所有 queue -> 飛機動畫  (function : broadcast entire queue data)
+2. 任何人寄信 (queue update) -> 動畫更新  (function : broadcast "add/delete" data)
+3. 配對完畢 -> 刪除資料 -> 動畫更新 
+"""
+
+async def send_all_queue(ws: WebSocket) :
+	try :
+		# 資料庫
+		with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
+
+			# 寫入 POSTCARDS
+			query = """
+				SELECT postcardID,mailFrom,mailTo,latitude,longitude,country 
+				FROM postcards
+				WHERE mailTo is null
+				"""
+			mycursor.execute(query)
+
+			results = mycursor.fetchall()
+			print(results)
+
+			# 將 latitude 和 longitude 的 Decimal 類型轉為 float (Fix : Object of type Decimal is not JSON serializable)
+			for result in results:
+				result['latitude'] = float(result['latitude'])
+				result['longitude'] = float(result['longitude'])
+				result['action'] = "add"
+
+			# 將查詢結果透過 WebSocket 發送到客戶端
+			await ws.send_text(json.dumps(results))
+			# print(results)
+	except WebSocketDisconnect :
+		manager.disconnect(ws)
+	except Exception as e :
+		print("發生錯誤 : ", e)
+
+
+async def broadcast_queue_update(postcard_id : list, action : str) :
+	try :
+		while True:
+			await manager.broadcast([{'postcardID': postcard_id, 'action': action}])
+	except Exception as e :
+		print("發生錯誤 : ", e)
+
+
+# 查詢 websocket
+@app.websocket("/ws/queue")
+async def ws_queue(ws: WebSocket):
+	try :
+		await manager.connect(ws)
+		await send_all_queue(ws)
+	except WebSocketDisconnect :
+		manager.disconnect(ws)
