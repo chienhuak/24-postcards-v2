@@ -71,18 +71,15 @@ class ConnectionManager:
 		self.active_connections.remove(websocket) # 將斷開的WebSocket連線從清單中移除
 
 	async def broadcast(self, message: str): # 向所有連線的WebSocket客戶端廣播訊息
-		print("WS廣播 to ",self.active_connections)
+		print("WS廣播 to ", self.active_connections)
 		for connection in self.active_connections:
-			print("WS廣播中 ...",connection.application_state)
-			if [] :	#connection.application_state != WebSocketState.CONNECTED:
-				print("WS連線已中斷!!!")
-			else:
-				try :
-					await connection.send_text(message)
-				except WebSocketDisconnect :
-					manager.disconnect(connection)
-				except Exception as e :
-					print("WS廣播失敗",e)
+			print("WS廣播狀態 ...", connection.application_state)
+			try :
+				await connection.send_text(message)
+			except WebSocketDisconnect :
+				manager.disconnect(connection)
+			except Exception as e :
+				print("WS廣播失敗",e)
 
 
 manager = ConnectionManager()
@@ -586,8 +583,9 @@ async def send_all_queue(ws: WebSocket) :
 
 async def broadcast_queue_update(postcard_id : list, action : str) :
 	try :
-		while True:
-			await manager.broadcast([{'postcardID': postcard_id, 'action': action}])
+		message = [{'postcardID': postcard_id, 'action': action}]
+		message_str = json.dumps(message)
+		await manager.broadcast(message_str)
 	except Exception as e :
 		print("發生錯誤 : ", e)
 
@@ -595,8 +593,11 @@ async def broadcast_queue_update(postcard_id : list, action : str) :
 # 查詢 websocket
 @app.websocket("/ws/queue")
 async def ws_queue(ws: WebSocket):
+	await manager.connect(ws)
+	await send_all_queue(ws)
 	try :
-		await manager.connect(ws)
-		await send_all_queue(ws)
+		while True:
+			data = await ws.receive_text()
+			await broadcast_queue_update(data)
 	except WebSocketDisconnect :
 		manager.disconnect(ws)
