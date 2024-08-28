@@ -1,5 +1,12 @@
 import { GLTFLoader } from "https://cdn.skypack.dev/three-stdlib@2.8.5/loaders/GLTFLoader"
 
+let textures = { 
+	tennisBump: await new THREE.TextureLoader().loadAsync("static/image/TennisBallBump.jpg"),
+	tennisColor: await new THREE.TextureLoader().loadAsync("static/image/NewTennisBallColor.jpg"),
+	planeTrailMask: await new THREE.TextureLoader().loadAsync("static/assets/mask.png"),  // 使用TextureLoader載入飛機尾跡的遮罩
+  }
+
+
 // 創建場景、相機和渲染器
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)  // 參數：相機視野、螢幕長寬比、可渲染物體最近的距離、可渲染物體最遠的距離
@@ -31,16 +38,39 @@ const material = new THREE.MeshBasicMaterial({ map: earthTexture })
 const earth = new THREE.Mesh(geometry, material)
 scene.add(earth)
 
-// 建立行星模型
-const planet = new THREE.Mesh(
-	new THREE.SphereGeometry(2.5, 32, 32),
+
+// 星星的軌道
+let radius = 7
+const ring1 = new THREE.Mesh(
+	new THREE.RingGeometry(radius, 6.95, 70, 1, 0),
+	new THREE.MeshPhysicalMaterial({ 
+	  color: "#FFCB8E",
+	  roughness: 0.25,
+	  side: THREE.DoubleSide,
+	  transparent: true,
+	  opacity: 0.35,
+	})
+  )
+ring1.position.set(0, 0, 0)
+ring1.rotation.x = Math.PI/3
+earth.add(ring1); 
+// console.log("檢查scene中有甚麼？",scene.children); // 檢查是否在場景中
+// console.log("檢查",ring1.position);
+// console.log("檢查",ring1.rotation);
+// console.log("檢查",ring1.material);
+
+
+// 建立衛星模型
+const satellite = new THREE.Mesh(
+	new THREE.SphereGeometry(0.9, 32, 32),
 	new THREE.MeshBasicMaterial({ 
-		color : 0x51B097,
-		map : new THREE.TextureLoader().load('./static/image/water.png')
+		color : 0x696969,
+		map : new THREE.TextureLoader().load('./static/image/latlon-base-map.png')
 	 })
 )
-scene.add(planet)
-planet.position.set(7, 0, 0)
+ring1.add(satellite)
+satellite.position.set(radius, 0, 0)
+
 
 
 camera.position.z = 10
@@ -52,12 +82,8 @@ group.add(earth)
 scene.add(group)
 
 // 做飛機
-let plane = (await new GLTFLoader().loadAsync("static/assets/plane/scene.glb")).scene.children[0]
-console.log("plane :",plane)
-let textures = { // 使用TextureLoader載入飛機尾跡的遮罩
-	planeTrailMask: await new THREE.TextureLoader().loadAsync("static/assets/mask.png"),
-  }
-let planesData = []
+let planeMesh = (await new GLTFLoader().loadAsync("static/assets/plane/scene.glb")).scene.children[0]
+export let planesData = []
 
 
 // 做座標
@@ -112,15 +138,15 @@ async function coordinatePoint(lat,lng,imageUrl) {
 	// console.log(earth.position)
 	console.log(point.position)
 
-	planesData.push(makePlane(plane, textures.planeTrailMask))
+	// planesData.push(makePlane())
 }
 
 function nr() { // 返回-1到1之間的隨機數
 	return Math.random() * 2 - 1;
-  }
+}
 
 
-function makePlane(planeMesh, trailTexture) {
+export function makePlane() {
 	let plane = planeMesh.clone();
 	plane.scale.set(0.0005, 0.0005, 0.0005)
 	// earth.add(plane)
@@ -146,12 +172,12 @@ function makePlane(planeMesh, trailTexture) {
 
 // 開始轉的地方
 earth.rotation.y = Math.PI / 3
-// earth.rotation.x = Math.PI / 10
-coordinatePoint(-25.0002052,144.051624,'./static/image/postcard_template.png')  // 澳洲
-coordinatePoint(25.0002052,121.3005753,'./static/image/postcard_template.png')  // 台灣
-// 0°經線和0°緯線
-coordinatePoint(0,0,'./static/image/postcard_template.png')  
-// console.log(planesData)
+// // earth.rotation.x = Math.PI / 10
+// coordinatePoint(-25.0002052,144.051624,'./static/image/postcard_template.png')  // 澳洲
+// coordinatePoint(25.0002052,121.3005753,'./static/image/postcard_template.png')  // 台灣
+// // 0°經線和0°緯線
+// coordinatePoint(0,0,'./static/image/postcard_template.png')  
+// // console.log(planesData)
 
 // 白色環境光
 const ambientLight = new THREE.AmbientLight(0xffffff, 2); 
