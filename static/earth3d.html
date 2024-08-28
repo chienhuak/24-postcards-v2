@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Postcards 3D</title>
-	
 	<link rel="stylesheet" href="/static/style.css">
 	<link rel="stylesheet" href="/static/menu.css">
 	<link rel="stylesheet" href="/static/on-off-button.css">
@@ -34,6 +33,9 @@
 		.home-link {
 			color: rgb(211, 217, 236);
 		}
+		#toggle-btn {
+			color : #666;
+		}
 		#paper {
             width: 100%;
             height: 600px;
@@ -42,7 +44,7 @@
 		body { margin: 0; }
 		canvas {
 			width: 100%;
-			height: 100%; 
+			min-height: 600px; 
 			display: block; 
 		}
 	</style>
@@ -107,6 +109,15 @@
 	<div name="placeholder" style="height:50px;"></div>
 	<div id="mapid" style="width: 100vw; max-height: calc(100vh-50px);"></div>
 
+	<!-- 動態視窗 -->
+	<div id="popupEl" class="popup">
+		<h2>
+			<span id="popupTitleEl"></span>
+			<span>Title</span>
+		</h2>
+		<p id="textEl" class="popupText">Text</p>
+	</div>
+
 	<!-- 寄送明信片編輯框 -->
 	<div id="dialog" title="編輯中...">
 		<div id="paper"></div>
@@ -155,7 +166,10 @@
 	<script src="/static/menu.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
 	<script type="module" src="static/earth3d.js"></script>
+	<script type="module" src="static/websocket.js"></script>
+	<!-- <script type="module" src="static/earth3d_full_airplane_3.js"></script> -->
 	<script>
 	document.addEventListener('DOMContentLoaded', function(){
 		checkLoginStatus()

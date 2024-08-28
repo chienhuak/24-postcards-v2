@@ -1,39 +1,40 @@
 /* Sidebar container */
 .sidebar {
-	height: 100%;
+	height: 60%;
 	width: 0;
 	position: fixed;
-	top: 0;
+	top: 50%; /* Position it at the middle of the screen */
+	transform: translateY(-50%); /* Adjust it to be vertically centered */
 	left: 0;
-	background-color: #f7e7e7;
+	/* background-color: #091332; */
+	background-color: rgba(9, 19, 50, 0.5); /* 背景色具有透明度 */
 	overflow-x: hidden;
 	transition: 0.5s;
 	padding-top: 60px;
 	z-index: 10000;
-	}
+}
 
 /* Sidebar links */
 .sidebar a {
 	padding: 10px 15px;
 	text-decoration: none;
 	font-size: 18px;
-	color: #818181;
+	color: rgb(211, 217, 236, 0.5);
 	display: block;
 	transition: 0.3s;
 	border : solid pink 0.5;
-	}
-
+}
 
 /* Sidebar links hover effect */
 .sidebar a:hover {
 	color: #f1f1f1; /* Change text color on hover */
-	background-color:  #b17474;
+	/* background-color:  #364770; */
+	background-color: rgba(54, 71, 112, 1); /* 改變區塊背景為不透明 */
 }
 
 .sidebar span:hover {
 	color: #f1f1f1;
 }
-
 
 /* Optional: Ensure span does not interfere with link hover */
 .sidebar span {

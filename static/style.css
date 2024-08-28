@@ -17,7 +17,7 @@ body {
 }
 
 .home-link {
-    color: #448899;
+    color: rgb(211, 217, 236);
     font-style: normal;
     font-size: 2em;
     font-weight: 600;
@@ -35,7 +35,7 @@ nav {
     box-sizing: border-box;
     position: fixed;
     z-index: 999;
-    background-color: #f8f8f8;
+    background-color: #091332;
     border-bottom: 1px solid #ddd;
 }
 

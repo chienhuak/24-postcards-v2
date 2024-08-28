@@ -62,7 +62,7 @@ earth.add(ring1);
 
 // 建立衛星模型
 const satellite = new THREE.Mesh(
-	new THREE.SphereGeometry(0.9, 32, 32),
+	new THREE.SphereGeometry(0.2, 32, 32),
 	new THREE.MeshBasicMaterial({ 
 		color : 0x696969,
 		map : new THREE.TextureLoader().load('./static/image/latlon-base-map.png')
@@ -146,7 +146,7 @@ function nr() { // 返回-1到1之間的隨機數
 }
 
 
-export function makePlane() {
+export function makePlane(userId) {
 	let plane = planeMesh.clone();
 	plane.scale.set(0.0005, 0.0005, 0.0005)
 	// earth.add(plane)
@@ -155,9 +155,19 @@ export function makePlane() {
 	// plane.quaternion.setFromUnitVectors(plane_up, direction)
 	// planes.push(plane)
 
+	// // 飛機上顯示 userID
+	// const userIdSprite = createTextSprite(userId);
+	// userIdSprite.position.set(0, 1, 0);  // Adjust as needed
+	// plane.add(userIdSprite);
+
+
 	let plane_group = new THREE.Group();
 	plane_group.add(plane);
 	earth.add(plane_group);
+
+	// 設置 userData，才能在 raycaster 中識別 
+	plane.userData.isPlane = true;
+	plane.userData.userId = userId;
 
 	return {
 		group: plane_group,
@@ -184,10 +194,24 @@ const ambientLight = new THREE.AmbientLight(0xffffff, 2);
 scene.add(ambientLight)
 
 
+const raycaster = new THREE.Raycaster()
+// console.log(raycaster)
+const popupEl = document.querySelector('#popupEl')
+
+
 const mouse = {
 	x: undefined,
 	y: undefined
 }
+
+
+// Raycaster : eventlistenser for Raycaster 
+const mouseRaycaster = {
+	x: undefined,
+	y: undefined
+}
+
+
 
 
 let clock = new THREE.Clock();
@@ -197,6 +221,8 @@ let clock = new THREE.Clock();
 function animate() {
 	requestAnimationFrame(animate)
 	earth.rotation.y += 0.001; // 地球轉速
+
+
 	
 
 	// 設置飛機的繞地球路徑
@@ -230,10 +256,49 @@ function animate() {
 	})
 	}
 
+	// 使用 raycaster 照亮 scene 裡滑鼠所在位置 (製造 hover 的效果)
+	raycaster.setFromCamera( mouseRaycaster, camera );
+
+	gsap.set(popupEl, {
+		display : 'none'
+	})
+
+	const intersects = raycaster.intersectObjects( earth.children, true);
+	// 在 raycaster.intersectObjects 中，第二个參數 true，則檢查所有子對象
+	// const intersects = raycaster.intersectObjects( earth.children.filter((mesh) =>{
+	// 	return mesh.geometry.type === 'PlaneGeometry'
+	// }) );
+
+	for ( let i = 0; i < intersects.length; i ++ ) {
+		// console.log("點到我囉！")
+		gsap.set(popupEl, {
+			display : 'block'
+		})
+
+		// intersects[ i ].object.material.color.set( 0xff0000 );
+
+	}
+
+	renderer.render( scene, camera );
+	
 
 }
 animate()
 
+// Raycaster 於滑鼠位置
+window.addEventListener('mousemove', (event) => {
+	mouseRaycaster.x = (event.clientX / window.innerWidth) * 2 - 1;
+	mouseRaycaster.y = -(event.clientY / window.innerHeight) * 2 + 1;
+	// console.log("Ray游標位置 X:", event.clientX, "Ray游標位置 Y:", event.clientY) 
+	gsap.set(popupEl, {
+		x: event.clientX,
+		y: event.clientY - 700 // 修正偏移量
+	})
+	// console.log("popupEl transform:", popupEl.style.transform)
+  });
+
+
+// 滑鼠轉動地球
 let isMouseDown = false
 
 window.addEventListener('mousedown', () => {
@@ -343,3 +408,44 @@ const atmosphere = new THREE.Mesh(
   atmosphere.scale.set(1.1, 1.1, 1.1)
   
   scene.add(atmosphere)
+
+
+// // 添加文字標示
+// function createTextSprite(userId) {
+
+//     // Create a canvas element
+//     const canvas = document.createElement('canvas');
+//     const context = canvas.getContext('2d');
+//     const fontSize = 50;
+//     canvas.width = 256;
+//     canvas.height = 128;
+
+//     // Set font and fill style
+//     context.font = `${fontSize}px Arial`;
+//     context.fillStyle = 'white';
+//     context.textAlign = 'center';
+//     context.textBaseline = 'middle';
+
+//     // Render userId on the canvas
+//     context.fillText(userId, canvas.width / 2, canvas.height / 2);
+
+// 	// Log canvas for debugging
+// 	console.log("確認是否建立文字canvas",canvas.toDataURL())
+
+//     // Create a texture from the canvas
+//     const texture = new THREE.CanvasTexture(canvas);
+
+//     // Create sprite material and sprite
+//     const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+//     const sprite = new THREE.Sprite(spriteMaterial);
+
+//     // Scale the sprite down so it fits the scene
+//     sprite.scale.set(2, 1, 1);  // Adjust scale as needed
+
+//     return sprite;
+// }
+
+
+console.log("scene.children裡面有甚麼：",scene.children)
+console.log("earth.children裡面有甚麼：",earth.children)
+console.log("group裡面有甚麼：",group)

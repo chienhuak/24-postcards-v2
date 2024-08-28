@@ -36,3 +36,33 @@
 	z-index: 1000 !important;
 	width : 850px !important;
 }
+
+#dialog {
+	display:none;
+}
+
+
+#popupEl {
+	position: fixed;
+}
+
+.popup {
+    background-color: rgba(208, 201, 201, 0.75); /* Black with 75% opacity */
+    position: fixed; /* Fixed position relative to the viewport */
+    padding: 16px; /* Padding around the content */
+    border-radius: 8px; /* Rounded corners */
+    color: white; /* White text color */
+	z-index: 999;
+}
+
+/* Title Styling */
+.popup h2 {
+    font-size: 12px; /* Small font size */
+    margin: 0; /* Remove default margin */
+}
+
+.popupText {
+    font-size: 24px; /* Larger font size */
+    font-weight: bold; /* Bold text */
+    margin: 8px 0 0 0; /* Top margin, no margin on sides or bottom */
+}
