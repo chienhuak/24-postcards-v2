@@ -9,6 +9,8 @@
   <link rel="stylesheet" href="/static/menu.css">
   <link rel="stylesheet" href="/static/on-off-button.css">
   <link rel="stylesheet" href="/static/home-sidebar.css"> 
+  <link rel="stylesheet" href="/static/func_popup.css"> 
+	<link rel="stylesheet" href="/static/painting.css"> 
 
 	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
 
@@ -19,8 +21,9 @@
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
 
   <!-- 引入 Font Awesome 的 CSS 文件 -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  
   <!-- 畫布用 -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
@@ -36,103 +39,133 @@
         height: 600px;
         border: 1px solid #ccc;
     }
+    #history-div {
+        border: 1px solid #ccc;
+        margin : 35px 0px;
+    }
+
+    #history-div span {
+        padding : 10px;
+    }
+
+    #history-div h3 {
+        padding : 10px;
+    }
+
+    .dataDiv {
+      margin: 8px 0px;
+    }
 </style>
 </head>
 <body>
   <div class="overlay" id="overlay"></div>
 
-	<!-- Sidebar -->
-	<div id="mySidebar" class="sidebar">
-		<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-    <a href="/collections"><i class="fa fa-envelope"></i> <span class="d-none d-md-inline">我的信箱</span></a>
-		<a href="#" <i class="fa fa-heart"></i> <span class="d-none d-md-inline">我的收藏</span></a>
-		<a href="#" <i class="fa fa-clock-o"></i> <span class="d-none d-md-inline">歷史紀錄</span></a>
-		<a href="#" <i class="fa fa-th"></i> <span class="d-none d-md-inline">造訪其他收藏</span></a>
-		<a href="#" <i class="fa fa-paper-plane"></i> <span class="d-none d-md-inline">朋友的通知</span></a>
-    <a href="#" <i class="fa fa-list"></i> <span class="d-none d-md-inline">網站連結</span></a>
+  <!-- Sidebar -->
+  <div id="mySidebar" class="sidebar">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <a href="/collections"><i class="fa fa-envelope"></i> <span class="d-none d-md-inline">我的信箱</span><span id="unreadCount" class="unread">0</span></a>
+    <a href="#" <i class="fa fa-copy"></i> <span class="d-none d-md-inline">我的郵票</span></a>
+    <a href="#" <i class="fa fa-pencil"></i> <span class="d-none d-md-inline">我的草稿</span></a>
+    <a href="#" onclick="ranking(event)"><i class="fa-solid fa-medal"></i> <span class="d-none d-md-inline">排行榜</span></a>
+    <a href="/history" <i class="fa fa-clock-o"></i> <span class="d-none d-md-inline">歷史紀錄</span></a>
+    <a href="#" <i class="fa fa-th"></i> <span class="d-none d-md-inline">造訪其他收藏</span></a>
+    <a href="#" <i class="fa fa-paper-plane"></i> <span class="d-none d-md-inline">朋友的通知</span></a>
+    <a href="#" <i class="fa fa-heart"></i> <span class="d-none d-md-inline">友站連結</span></a>
     <a href="#" <i class="fa fa-gear"></i> <span class="d-none d-md-inline">設定</span></a>
-		<a href="#" <i class="fa fa-star"></i> <span class="d-none d-md-inline">公告</span></a></div>
+    <a href="#" <i class="fa fa-star"></i> <span class="d-none d-md-inline">公告</span></a></div>
 
-	</div>
+  </div>
 
-  <nav>
-    <div class="nav-group">
-      <div class="nav-group-left">
-        <span id="toggle-btn" onclick="toggleSidebar()">&#9776; </span>	
-        <a class="home-link" href="/home">Project-July Postcards</a>
-      </div>        
-      <div class="nav-group-right">
-        <a class = "a-style-1" href="/feed" onclick="toFeed()">留言板</a>
-        <a id = "signin-card" class = "a-style-1" href="" onclick="card(); return false;">登入/註冊</a>
-        <a id = "signout-btn" class = "a-style-1" href="" onclick="signout()">登出</a>
-      </div>
-    </div>
-    <!-- pop up memu -->
-    <div class = "card">
-      <div class = "card-decorator"></div>
-      <button class = "close-btn" type="button" onclick="card_close()">X</button>
-      <h1>登入會員帳號</h1>
-      <input type="text"  id = "email" class = "popup-input" placeholder="輸入電子信箱">
-      <input type="password"  id = "password" class = "popup-input" placeholder="輸入密碼">
-      <button class = "popup-btn" type="button" onclick="signin()">登入帳戶</button>
-      <p class="center-text">還沒有帳戶？<span class="change-card" onclick="showRegister()">點此註冊</span></p>
-      <p id="note2" class="note center-text"></p>
-    </div>
-    <div class = "card" id = "cardx">
-      <div class = "card-decorator"></div>
-      <button class = "close-btn" type="button" onclick="card_close()">X</button>
-      <h1>註冊會員帳號</h1>
-      <input type="text"  id = "namex" class = "popup-input" placeholder="輸入暱稱">
-      <input type="text"  id = "emailx" class = "popup-input" placeholder="輸入電子信箱">
-      <input type="password"  id = "passwordx" class = "popup-input" placeholder="輸入密碼">
-      <!-- <input type="text"  id = "countryx" class = "popup-input" placeholder="輸入國家"> -->
-      <select id="country-select" name="country" class = "popup-input">
-        <option value="">（選擇國家）</option>
-      </select>
-      <button class = "popup-btn" onclick="register()">註冊</button>
-      <p class="center-text"><span class="change-card" onclick="showSignin()">已經有帳戶了？點此登入</span></p>
-      <p id="note" class="note center-text"></p>
-    </div>
-  </nav>
+	<nav>
+		<div class="nav-group">
+		<div class="nav-group-left">
+			<span id="toggle-btn" onclick="toggleSidebar()">&#9776; </span>	
+			<a class="home-link" href="/home"><img style="width: 41px; vertical-align: middle;" src="/static/image/post-card.png">Project-July Postcards</a>
+		</div>        
+		<div class="nav-group-right">
+			<a class = "a-style-1" href="/feed" onclick="toFeed()">留言板</a>
+			<a id = "signin-card" class = "a-style-1" href="" onclick="card(); return false;">登入/註冊</a>
+			<a id = "signout-btn" class = "a-style-1" href="" onclick="signout()">登出</a>
+		</div>
+		</div>
+		<!-- pop up memu -->
+		<div class = "card">
+		<div class = "card-decorator"></div>
+		<button class = "close-btn" type="button" onclick="card_close()">X</button>
+		<h1>登入會員帳號</h1>
+		<input type="text"  id = "email" class = "popup-input" placeholder="輸入電子信箱">
+		<input type="password"  id = "password" class = "popup-input" placeholder="輸入密碼">
+		<button class = "popup-btn" type="button" onclick="signin()">登入帳戶</button>
+		<p class="center-text">還沒有帳戶？<span class="change-card" onclick="showRegister()">點此註冊</span></p>
+		<p id="note2" class="note center-text"></p>
+		</div>
+		<div class = "card" id = "cardx">
+		<div class = "card-decorator"></div>
+		<button class = "close-btn" type="button" onclick="card_close()">X</button>
+		<h1>註冊會員帳號</h1>
+		<input type="text"  id = "namex" class = "popup-input" placeholder="輸入暱稱">
+		<input type="text"  id = "emailx" class = "popup-input" placeholder="輸入電子信箱">
+		<input type="password"  id = "passwordx" class = "popup-input" placeholder="輸入密碼">
+		<!-- <input type="text"  id = "countryx" class = "popup-input" placeholder="輸入國家"> -->
+		<select id="country-select" name="country" class = "popup-input">
+			<option value="">（選擇國家）</option>
+		</select>
+		<button class = "popup-btn" onclick="register()">註冊</button>
+		<p class="center-text"><span class="change-card" onclick="showSignin()">已經有帳戶了？點此登入</span></p>
+		<p id="note" class="note center-text"></p>
+		</div>
+	</nav>
+
   <div name="placeholder" style="height:50px;"></div>
   <div class="container1200">
+
+    <!-- 歷史資料追蹤區 -->
+    <div id="history-div">
+      <h3>歷史資料追蹤區</h3>
+    </div>
+
+    <!-- 地圖 -->
     <div id="mapid" style="width: 1200px; height: 600px;"></div>
+
   </div>
 
-  <!-- 寄送明信片編輯框 -->
-  <div id="dialog" title="編輯中...">
-    <div id="paper"></div>
-    <button id="add-text">Add Text</button>
-    <button id="add-image">Add Image</button>
-	  <input type="file" id="upload-image" accept="image/*">
-    <button id="save">Save</button>
-    <form>
-      <fieldset class="ui-helper-reset">
-      <label for="img_upload">Photo</label>
-      <input id="img_upload" name="img_upload" type="file">
-      <label for="tab_title">Title</label>
-      <input type="text" name="tab_title" id="tab_title" value="Tab Title" class="ui-widget-content ui-corner-all">
-      <label for="tab_content">Content</label>
-      <textarea name="tab_content" id="tab_content" class="ui-widget-content ui-corner-all">輸入一點訊息</textarea>
-      <!-- Rounded switch -->
-      <label>Random Mode</label>
-      <label class="switch">
-        <input type="checkbox">
-        <span class="slider round"></span>
-      </label>
-      </fieldset>
-    </form>
-  </div>
+	<!-- 動態視窗 -->
+	<div id="popupEl" class="popup">
+		<h2>
+			<span id="popupTitleEl"></span>
+			<span>Title</span>
+		</h2>
+		<p id="textEl" class="popupText">Text</p>
+	</div>
 
-  <!-- <button id="action_btn">選擇</button> -->
+	<!-- 功能表單展開視窗 -->
+	<div id="func_popupEl" class="popup2">
+		<a id="closeRank" class="closebtn d-none d-md-inline">&times;</a>
+		<div>
+			<span id="func_popupTitleEl">Title</span>
+		</div>
+		<p id="func_textEl" class="popupText">Text</p>
+	</div>
 
-  <!-- 其他功能按鈕 -->
-  <div id="postcard">
-      <button type="button" id="action_btn"><i class="fa fa-envelope"></i></button>
-  </div>
-  <div id="createcard">
-      <button type="button"> <i class="fa fa-pencil"></i></button>
-  </div>
+	<!-- 寄送明信片編輯框 -->
+	<div id="dialog" title="編輯中...">
+		<div id="paper"></div>
+		<div id="canvas-controls">
+			<button id="add-text">Add Text</button>
+			<button id="add-image" style="display: none;">Add Image</button>
+			<input type="file" id="upload-image" accept="image/*">
+			<button id="save">Save</button>
+		</div>
+		<form>
+		
+		</form>
+	</div>
+
+	<!-- 其他功能按鈕 -->
+	<div id="postcard">
+		<button type="button" id="action_btn"><i class="fa fa-envelope"></i></button>
+	</div>
+
 
   <footer class="footer">Copyright 	&#169;  Project-July</footer>
 
@@ -140,13 +173,14 @@
   <script src="static/painting.js"></script>
   <script src="static/home-sidebar.js"></script>
   <script src="static/map-leaflet.js"></script>
+  <script src="static/history.js"></script>
 
     <!-- jQuery first -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
     <script src="/static/menu.js"></script>
-    <!-- <script src="/static/postcards.js"></script> -->
+    <script src="static/func_popup.js"></script>
     <script>
       document.addEventListener('DOMContentLoaded', function(){
         checkLoginStatus()

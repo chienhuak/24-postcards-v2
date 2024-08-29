@@ -634,10 +634,41 @@ async def unread(request: Request):
 			mycursor.execute(query, (myjwtx["name"],))
 
 			results = mycursor.fetchall()
-			print("未讀數量：",results)
+			# print("未讀數量：",results)
 			
 			return JSONResponse(status_code=200, content={
 					"data": results })
+
+
+# 查詢歷史紀錄
+@app.get("/api/history", response_class=JSONResponse)
+async def history(request: Request):
+
+	auth_header = request.headers.get('Authorization')
+	if auth_header:
+		myjwt = auth_header.split(" ")[1] 
+		myjwtx = jwt.decode(myjwt,jwtkey,algorithms="HS256")
+
+		with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
+			query = """
+				SELECT *
+				FROM postcards
+				WHERE mailFrom = %s
+				"""
+			mycursor.execute(query, (myjwtx["name"],))	
+			results = mycursor.fetchall()
+
+			for result in results:
+				result['latitude'] = float(result['latitude'])
+				result['longitude'] = float(result['longitude'])
+				result['timecreated'] = result['timecreated'].isoformat()
+
+			print("我的歷史資料：",results)
+			
+			return JSONResponse(status_code=200, content={
+					"data": results })
+
+
 
 
 # @app.websocket("/ws")
@@ -708,5 +739,4 @@ async def ws_queue(ws: WebSocket):
 			await broadcast_queue_update(data)
 	except WebSocketDisconnect :
 		manager.disconnect(ws)
-
 
