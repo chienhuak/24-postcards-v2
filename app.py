@@ -107,7 +107,8 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
 @app.get("/home", include_in_schema=False)
 async def home(request: Request):
-	return FileResponse("./static/home.html", media_type="text/html")
+	return FileResponse("./static/earth3d.html", media_type="text/html")
+
 @app.get("/feed", include_in_schema=False)
 async def feed(request: Request):
 	return FileResponse("./static/feed.html", media_type="text/html")
@@ -120,14 +121,13 @@ async def feed(request: Request):
 async def collections(request: Request):
 	return FileResponse("./static/collections.html", media_type="text/html")
 
-
 @app.get("/painting", include_in_schema=False)
 async def feed(request: Request):
 	return FileResponse("./static/painting.html", media_type="text/html")
 
-@app.get("/earth3d", include_in_schema=False)
+@app.get("/history", include_in_schema=False)
 async def feed(request: Request):
-	return FileResponse("./static/earth3d.html", media_type="text/html")
+	return FileResponse("./static/home.html", media_type="text/html")
 
 
 # 新增明信片

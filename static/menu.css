@@ -34,17 +34,19 @@
 
 .ui-dialog {
 	z-index: 1000 !important;
-	width : 850px !important;
+	width : 650px !important;
+	min-height : 500px !important; 
 }
 
 #dialog {
-	display:none;
+	display : none;
 }
 
 
 #popupEl {
 	position: fixed;
 }
+
 
 .popup {
     background-color: rgba(208, 201, 201, 0.75); /* Black with 75% opacity */
