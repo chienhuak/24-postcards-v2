@@ -1,4 +1,5 @@
-function ranking() {
+function ranking(event) {
+	event.preventDefault()
 	fetch('/api/ranking', {
 		method: 'GET'
 	  })
@@ -26,3 +27,28 @@ function ranking() {
 document.getElementById('closeRank').addEventListener('click', function() {
     document.getElementById('func_popupEl').classList.remove('show')
 })
+
+
+
+
+// 顯示未讀數量
+function updateUnreadCount() {
+	const token = localStorage.getItem('token')
+	fetch('/api/unread', {
+		headers: {
+			'Authorization': `Bearer ${token}`, // 將 JWT 放在 Authorization Header 中
+			'Content-Type': 'application/json'
+		},
+		method: 'GET'
+	  })
+	  .then(response => response.json())
+	  .then(data => {
+
+		const unreadCount = document.getElementById('unreadCount');
+		unreadCount.textContent = data.data[0].count // > 0 ? count : ''; // 如果沒有未讀訊息則隱藏
+})
+}
+
+updateUnreadCount()
+
+

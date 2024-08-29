@@ -59,3 +59,17 @@
 	height : 30px;
 	display: block;
 }
+
+
+.unread {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: rgb(32, 194, 21);
+    color: white;
+    text-align: center;
+    line-height: 20px;
+    font-size: 18px;
+    margin-left: 8px;
+}

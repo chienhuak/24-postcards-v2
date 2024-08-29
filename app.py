@@ -255,9 +255,14 @@ async def random_matching(request: Request):
 				DELETE FROM postcard_queue
 				WHERE postcardID in (%s,%s)
 				"""
+			query4 = """
+				INSERT INTO notifications (type, ref)
+				VALUES ('newarrive', %s),('newarrive', %s)
+				"""
 			mycursor.execute(query1, (i[0],i[1]))
 			mycursor.execute(query2, (i[1],i[0]))
 			mycursor.execute(query3, (i[1],i[0]))
+			mycursor.execute(query4, (i[1],i[0]))
 
 			broadcast_del_list.append(i[0])
 			broadcast_del_list.append(i[1])
@@ -555,6 +560,36 @@ async def ranking(request: Request):
 					"data": results })
 
 
+# 未讀訊息數量
+@app.get("/api/unread", response_class=JSONResponse)
+async def unread(request: Request):
+	
+	# 從 Authorization Header 中提取 token
+	auth_header = request.headers.get('Authorization')
+	if auth_header:
+		myjwt = auth_header.split(" ")[1] 
+
+		# 解碼 JWT
+		myjwtx = jwt.decode(myjwt,jwtkey,algorithms="HS256")
+		print("目前登入：",myjwtx["name"])
+
+		# 將資料存到資料庫
+		with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
+			query = """
+				SELECT postcards.mailTo , count(postcards.mailTo) as count
+				FROM notifications n
+				INNER JOIN postcards ON n.ref = postcards.postcardID
+				WHERE readStatus <> 'Y' and postcards.mailTo = %s
+				"""
+			mycursor.execute(query, (myjwtx["name"],))
+
+			results = mycursor.fetchall()
+			print("未讀數量：",results)
+			
+			return JSONResponse(status_code=200, content={
+					"data": results })
+
+
 # @app.websocket("/ws")
 # async def websocket_endpoint(websocket: WebSocket):
 #     await manager.connect(websocket)
@@ -577,7 +612,7 @@ async def send_all_queue(ws: WebSocket) :
 		# 資料庫
 		with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
 
-			# 寫入 POSTCARDS
+			# 查詢 POSTCARDS
 			query = """
 				SELECT postcardID,mailFrom,mailTo,latitude,longitude,country 
 				FROM postcards
@@ -612,14 +647,16 @@ async def broadcast_queue_update(postcard_id : list, action : str) :
 		print("發生錯誤 : ", e)
 
 
-# 查詢 websocket
+# 顯示動畫的 websocket
 @app.websocket("/ws/queue")
 async def ws_queue(ws: WebSocket):
 	await manager.connect(ws)
-	await send_all_queue(ws)
+	await send_all_queue(ws)  # 加載初始的等待配對信件
 	try :
 		while True:
 			data = await ws.receive_text()
 			await broadcast_queue_update(data)
 	except WebSocketDisconnect :
 		manager.disconnect(ws)
+
+
