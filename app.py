@@ -275,6 +275,56 @@ async def random_matching(request: Request):
 			"ok": True
 			} 
 
+
+# 新增明信片 : 指定收件人、寄出當下直接配送完畢 TBD
+@app.post("/api/mailto", response_class=JSONResponse)
+async def mailto(request: Request):
+
+	# 從 Authorization Header 中提取 token
+	auth_header = request.headers.get('Authorization')
+	if auth_header:
+		myjwt = auth_header.split(" ")[1] 
+
+		# 解碼 JWT
+		myjwtx = jwt.decode(myjwt,jwtkey,algorithms="HS256")
+
+		print("print myjwtx:", myjwtx)
+
+		# 解析請求的 JSON 資料
+		data = await request.json()
+
+		print("Print Received data:", data)
+
+		# 將資料存到資料庫
+		with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
+
+			# 寫入 POSTCARDS
+			query = """
+				INSERT INTO postcards (mailFrom, mailTo, country, message, latitude, longitude, image)
+				VALUES (%s, %s, %s, %s, %s, %s, %s)
+				"""
+			mycursor.execute(query, (myjwtx["name"], data["mailto"], myjwtx["country"], data["message"], data["latitude"], data["longitude"], data["imglink"],))
+
+			# 獲取最後插入資料自動產生的 ID
+			postcard_id = mycursor.lastrowid
+
+			# 寫入 notifications table
+			query2 = """
+				INSERT INTO notifications (type, ref)
+				VALUES ('newarrive', %s)
+				"""
+			mycursor.execute(query2, (postcard_id,))
+
+			mydb.commit()
+
+			return JSONResponse(status_code=200, content={
+				"data": "ok"})
+			# return JSONResponse(status_code=200, content={
+			# 		"name": myjwtx["name"], 
+			# 		"country": myjwtx["country"], 
+			# 		"message": data["message"],
+			# 		"latitude": data["latitude"],
+			# 		"longitude": data["longitude"]})
 		
 
 # 登入會員資訊
