@@ -1,8 +1,8 @@
 import { GLTFLoader } from "https://cdn.skypack.dev/three-stdlib@2.8.5/loaders/GLTFLoader"
 
 let textures = { 
-	tennisBump: await new THREE.TextureLoader().loadAsync("static/image/TennisBallBump.jpg"),
-	tennisColor: await new THREE.TextureLoader().loadAsync("static/image/NewTennisBallColor.jpg"),
+	// tennisBump: await new THREE.TextureLoader().loadAsync("static/image/TennisBallBump.jpg"),
+	// tennisColor: await new THREE.TextureLoader().loadAsync("static/image/NewTennisBallColor.jpg"),
 	planeTrailMask: await new THREE.TextureLoader().loadAsync("static/assets/mask.png"),  // 使用TextureLoader載入飛機尾跡的遮罩
   }
 
@@ -195,6 +195,7 @@ scene.add(ambientLight)
 
 
 const raycaster = new THREE.Raycaster()
+raycaster.ray.direction.multiplyScalar(100) // 增加檢測範圍
 // console.log(raycaster)
 const popupEl = document.querySelector('#popupEl')
 

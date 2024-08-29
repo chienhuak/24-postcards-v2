@@ -181,7 +181,6 @@ async def add_postcards(request: Request):
 					"longitude": data["longitude"]})
 
 
-
 # 隨機配對，然後將配對結果回填到資料庫
 @app.get("/api/matching", response_class=JSONResponse)
 async def random_matching(request: Request):
@@ -531,6 +530,29 @@ async def collections(request: Request, page:Optional[int]=0,keyword:Optional[st
 	return {
 		"nextPage": page+1 if len(results) == 12 else None,
 		"data": results}
+
+
+# 查詢玩家排名
+@app.get("/api/ranking", response_class=JSONResponse)
+async def ranking(request: Request):
+
+		# 將資料存到資料庫
+		with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
+
+			# 寫入 POSTCARDS
+			query = """
+				SELECT mailFrom, count(mailFrom) as total 
+				FROM postcards
+				GROUP BY mailFrom 
+				ORDER BY total DESC
+				"""
+			mycursor.execute(query)
+
+			results = mycursor.fetchall()
+			print(results)
+			
+			return JSONResponse(status_code=200, content={
+					"data": results })
 
 
 # @app.websocket("/ws")

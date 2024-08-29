@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="/static/menu.css">
 	<link rel="stylesheet" href="/static/on-off-button.css">
 	<link rel="stylesheet" href="/static/home-sidebar.css"> 
+	<link rel="stylesheet" href="/static/func_popup.css"> 
   
 	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
   
@@ -15,6 +16,7 @@
 	<link rel="stylesheet" href="https://code.jquery.com/ui/1.14.0/themes/base/jquery-ui.css">
   
 	<!-- 引入 Font Awesome 的 CSS 文件 -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
   
 	<!-- 畫布用 -->
@@ -55,13 +57,14 @@
 		<!-- Sidebar -->
 		<div id="mySidebar" class="sidebar">
 			<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-		<a href="/collections"><i class="fa fa-envelope"></i> <span class="d-none d-md-inline">我的信箱</span></a>
+			<a href="/collections"><i class="fa fa-envelope"></i> <span class="d-none d-md-inline">我的信箱</span></a>
 			<a href="#" <i class="fa fa-heart"></i> <span class="d-none d-md-inline">我的收藏</span></a>
+			<a href="#" onclick="ranking()"><i class="fa-solid fa-medal"></i> <span class="d-none d-md-inline">排行榜</span></a>
 			<a href="#" <i class="fa fa-clock-o"></i> <span class="d-none d-md-inline">歷史紀錄</span></a>
 			<a href="#" <i class="fa fa-th"></i> <span class="d-none d-md-inline">造訪其他收藏</span></a>
 			<a href="#" <i class="fa fa-paper-plane"></i> <span class="d-none d-md-inline">朋友的通知</span></a>
-		<a href="#" <i class="fa fa-list"></i> <span class="d-none d-md-inline">網站連結</span></a>
-		<a href="#" <i class="fa fa-gear"></i> <span class="d-none d-md-inline">設定</span></a>
+			<a href="#" <i class="fa fa-list"></i> <span class="d-none d-md-inline">網站連結</span></a>
+			<a href="#" <i class="fa fa-gear"></i> <span class="d-none d-md-inline">設定</span></a>
 			<a href="#" <i class="fa fa-star"></i> <span class="d-none d-md-inline">公告</span></a></div>
 
 		</div>
@@ -118,6 +121,15 @@
 		<p id="textEl" class="popupText">Text</p>
 	</div>
 
+	<!-- 功能表單展開視窗 -->
+	<div id="func_popupEl" class="popup2">
+		<a id="closeRank" class="closebtn d-none d-md-inline">&times;</a>
+		<div>
+			<span id="func_popupTitleEl">Title</span>
+		</div>
+		<p id="func_textEl" class="popupText">Text</p>
+	</div>
+
 	<!-- 寄送明信片編輯框 -->
 	<div id="dialog" title="編輯中...">
 		<div id="paper"></div>
@@ -164,12 +176,12 @@
 	<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
 	<script src="https://code.jquery.com/ui/1.14.0/jquery-ui.js"></script>
 	<script src="/static/menu.js"></script>
+	<script src="static/func_popup.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
 	<script type="module" src="static/earth3d.js"></script>
 	<script type="module" src="static/websocket.js"></script>
-	<!-- <script type="module" src="static/earth3d_full_airplane_3.js"></script> -->
 	<script>
 	document.addEventListener('DOMContentLoaded', function(){
 		checkLoginStatus()
