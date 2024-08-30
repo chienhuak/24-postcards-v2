@@ -36,8 +36,32 @@ function collections(page, keyword = "") {
                 div.appendChild(textdiv)
             }
             nextPage = data.nextPage; 
+            read()
         })
         .catch(error => {
             console.error('Error:', error)
         });
+}
+
+
+// 更新未讀數量
+function read() {
+	const token = localStorage.getItem('token')
+	fetch('/read', {
+		headers: {
+			'Authorization': `Bearer ${token}`, // 將 JWT 放在 Authorization Header 中
+			'Content-Type': 'application/json'
+		},
+		method: 'PUT'
+	  })
+	  .then(response => response.json())
+	  .then(data => {
+		if (data.ok) {
+			const unreadCount = document.getElementById('unreadCount')
+            if (unreadCount) {
+                unreadCount.style.display = "none" // 如果沒有未讀訊息則隱藏
+            }
+		}
+
+})
 }

@@ -611,7 +611,7 @@ async def ranking(request: Request):
 
 
 # 未讀訊息數量
-@app.get("/api/unread", response_class=JSONResponse)
+@app.get("/unread", response_class=JSONResponse)
 async def unread(request: Request):
 	
 	# 從 Authorization Header 中提取 token
@@ -634,10 +634,47 @@ async def unread(request: Request):
 			mycursor.execute(query, (myjwtx["name"],))
 
 			results = mycursor.fetchall()
-			# print("未讀數量：",results)
+			print("未讀數量：",results)
 			
 			return JSONResponse(status_code=200, content={
 					"data": results })
+
+
+# 更新訊息狀態為已讀
+@app.put("/read", response_class=JSONResponse)
+async def read(request: Request):
+	try:
+	
+		# 從 Authorization Header 中提取 token
+		auth_header = request.headers.get('Authorization')
+		if auth_header:
+			myjwt = auth_header.split(" ")[1] 
+
+			# 解碼 JWT
+			myjwtx = jwt.decode(myjwt,jwtkey,algorithms="HS256")
+			print("目前登入：",myjwtx["name"])
+
+			# 將資料存到資料庫
+			with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
+				query = """
+					UPDATE notifications n
+					INNER JOIN postcards ON n.ref = postcards.postcardID
+					SET n.readStatus = 'Y'
+					WHERE readStatus <> 'Y' and postcards.mailTo = %s
+					"""
+				mycursor.execute(query, (myjwtx["name"],))
+				mydb.commit()
+				print("未讀訊息已成功標記為已讀")
+				
+				return JSONResponse(status_code=200, content={
+						"ok": True })
+	except Exception as e:
+		print("已讀更新錯誤:", e)
+		return JSONResponse(status_code=500, content={
+            "ok": False
+        })
+	
+
 
 
 # 查詢歷史紀錄
