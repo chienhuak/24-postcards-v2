@@ -2,7 +2,15 @@ import { makePlane, planesData } from "./earth3d.js"
 
 
 // 頁面載入時，使用 JavaScript 建立 WebSocket 連線到 Server "/ws/queue" endpoint
-const ws = new WebSocket('ws://127.0.0.1:8000/ws/queue')
+// const ws = new WebSocket('ws://127.0.0.1:8000/ws/queue')
+let wsUrl
+if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    wsUrl = "ws://localhost:8000/ws/queue"
+} else {
+    wsUrl = "wss://" + window.location.hostname + "/ws/queue"
+}
+const ws = new WebSocket(wsUrl)
+
 
 ws.onopen = function(event) {
     console.log('已建立 WebSocket 通訊')
@@ -25,9 +33,11 @@ ws.onmessage = async function(event) {
 
 	// 為每個待配對信件生成一個飛機動畫
 	for (const item of data) {
-		planesData.push(makePlane());
+		const userId = item.mailFrom
+		planesData.push(makePlane(userId));
 	}
 
 
 }
+
 
