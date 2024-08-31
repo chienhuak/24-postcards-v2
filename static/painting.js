@@ -4,13 +4,13 @@ var graph = new joint.dia.Graph;
 var paper = new joint.dia.Paper({
 	el: document.getElementById('paper'),
 	model: graph,
-	width: 800,
-	height: 400,
+	width: 600,
+	height: 433,
 	gridSize: 10,
 	drawGrid: true,
-	background: {
-		color: 'white'
-	},
+	// background: {
+	// 	color: 'white'
+	// },
 	interactive: true,
 });
 
@@ -21,6 +21,13 @@ var paper = new joint.dia.Paper({
 // text.resize(100, 40);
 // text.attr('label/text', 'Click me!');
 // text.addTo(graph);
+var imaged = new joint.shapes.standard.Image();
+imaged.position(-28, -22.5);
+// image.resize(687, 400);
+// image.attr('image/xlinkHref', 'static/image/postcard_template.png'); 
+imaged.resize(656, 478);
+imaged.attr('image/xlinkHref', 'static/image/vintage-mailing-envelope.png'); 
+imaged.addTo(graph);
 
 
 var lastElement;
@@ -88,9 +95,11 @@ document.getElementById('add-image').addEventListener('click', addImage);
 
 function addText() {
     var text = new joint.shapes.standard.TextBlock();
-    text.position(50, 50);
-    text.resize(100, 40);
-    text.attr('label/text', 'Edit me!');
+    text.position(405, 210);
+    text.resize(140, 160);
+    text.attr('label/text','Click to edit!');
+    text.attr('body/fill','none');
+    text.attr('body/stroke','rgba(0, 0, 0, 0.4)');
     text.addTo(graph);
 
 }
@@ -129,8 +138,8 @@ $('#upload-image').on('change', function(event) {
         var reader = new FileReader();
         reader.onload = function(e) {
             var image = new joint.shapes.standard.Image();
-            image.resize(100, 100);
-            image.position(100, 100);
+            image.resize(345, 336);
+            image.position(45, 55);
             image.attr('image/xlinkHref', e.target.result); // 使用上傳的圖片
             image.addTo(graph);
 
@@ -183,7 +192,10 @@ const ResizeTool = joint.elementTools.Control.extend({
 
 // 上傳圖片到 AWS
 document.getElementById('save').addEventListener('click', function() {
-    html2canvas(document.querySelector("#paper")).then(canvas => {
+    html2canvas(document.querySelector("#paper"), {
+        useCORS: true, // 允許跨域請求
+        background: '#ffffff' // 背景色
+    }).then(canvas => {
         canvas.toBlob(function(blob) {
             var formData = new FormData();
             formData.append('canvas_image', blob, 'canvas-image.png');
@@ -191,7 +203,7 @@ document.getElementById('save').addEventListener('click', function() {
             fetch('/api/saveCanvas', {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer YOUR_JWT_TOKEN' // 替换为实际的 JWT token
+                    'Authorization': 'Bearer YOUR_JWT_TOKEN' // TBD
                 },
                 body: formData
             })
