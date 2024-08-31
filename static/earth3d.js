@@ -155,19 +155,26 @@ export function makePlane(userId) {
 	// plane.quaternion.setFromUnitVectors(plane_up, direction)
 	// planes.push(plane)
 
-	// // 飛機上顯示 userID
-	// const userIdSprite = createTextSprite(userId);
-	// userIdSprite.position.set(0, 1, 0);  // Adjust as needed
-	// plane.add(userIdSprite);
+	console.log("飛機顯示：",userId)
+
+	// 飛機上顯示 userID
+	const userIdTag = createTextMesh(userId);
+	userIdTag.position.set(-0.1, 0.1, 0)
+	userIdTag.rotateX(Math.PI)  // Canvas 文字只能單面顯示，翻轉 180% 使正面朝上 
+	userIdTag.rotateZ(Math.PI/2)
+	userIdTag.scale.set(1/0.0005, 1/0.0005, 1/0.0005)
+	plane.add(userIdTag)
 
 
 	let plane_group = new THREE.Group();
 	plane_group.add(plane);
 	earth.add(plane_group);
 
+
 	// 設置 userData，才能在 raycaster 中識別 
 	plane.userData.isPlane = true;
 	plane.userData.userId = userId;
+
 
 	return {
 		group: plane_group,
@@ -176,6 +183,7 @@ export function makePlane(userId) {
 		rad: Math.random() * Math.PI * 0.45 + Math.PI * 0.05,
 		randomAxis: new THREE.Vector3(nr(), nr(), nr()).normalize(),
 		randomAxisRot: Math.random() * Math.PI * 1.2,
+		userIdTag: userIdTag
 	}
 }
 
@@ -241,6 +249,8 @@ function animate() {
 			plane.rotateOnAxis(new THREE.Vector3(0, 0, 1), planeData.rad);    // this decides the radius
 			plane.translateY(planeData.yOff);
 			plane.rotateOnAxis(new THREE.Vector3(1,0,0), 2*Math.PI);
+			// const tag = planeData.userIdTag
+			// tag.quaternion.copy(camera.quaternion); // 永遠正面顯示
 		});
 	};
 
@@ -411,42 +421,42 @@ const atmosphere = new THREE.Mesh(
   scene.add(atmosphere)
 
 
-// // 添加文字標示
-// function createTextSprite(userId) {
+// // 測試顯示文字 
+// const canvas = document.createElement('canvas')
+// const context = canvas.getContext('2d')
+// canvas.width = 30
+// canvas.height = 30
+// context.fillStyle = 'white'
+// context.font = '18px Arial'
+// context.fillText('Hello', 150, 100)
 
-//     // Create a canvas element
-//     const canvas = document.createElement('canvas');
-//     const context = canvas.getContext('2d');
-//     const fontSize = 50;
-//     canvas.width = 256;
-//     canvas.height = 128;
+// const texture = new THREE.CanvasTexture(canvas)
 
-//     // Set font and fill style
-//     context.font = `${fontSize}px Arial`;
-//     context.fillStyle = 'white';
-//     context.textAlign = 'center';
-//     context.textBaseline = 'middle';
+// const geometry2 = new THREE.PlaneGeometry(5, 5)
+// const material2 = new THREE.MeshBasicMaterial({ map: texture, transparent: true })
 
-//     // Render userId on the canvas
-//     context.fillText(userId, canvas.width / 2, canvas.height / 2);
-
-// 	// Log canvas for debugging
-// 	console.log("確認是否建立文字canvas",canvas.toDataURL())
-
-//     // Create a texture from the canvas
-//     const texture = new THREE.CanvasTexture(canvas);
-
-//     // Create sprite material and sprite
-//     const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-//     const sprite = new THREE.Sprite(spriteMaterial);
-
-//     // Scale the sprite down so it fits the scene
-//     sprite.scale.set(2, 1, 1);  // Adjust scale as needed
-
-//     return sprite;
-// }
+// const mesh = new THREE.Mesh(geometry2, material2)
+// mesh.position.set(8,0,0)
+// scene.add(mesh)
 
 
-console.log("scene.children裡面有甚麼：",scene.children)
-console.log("earth.children裡面有甚麼：",earth.children)
-console.log("group裡面有甚麼：",group)
+
+function createTextMesh(userId) {
+	
+	const canvas = document.createElement('canvas')
+	const context = canvas.getContext('2d')
+	context.fillStyle = 'yellow'
+	context.font = '18px Arial'
+	context.fillText(userId, 140, 90)
+
+	// 將 canvas 當作紋裡
+	const texture = new THREE.CanvasTexture(canvas)
+
+	// 建立平面，應用紋理
+	const geometry2 = new THREE.PlaneGeometry(5, 5)
+	const material2 = new THREE.MeshBasicMaterial({ map: texture, transparent: true })
+
+	// 建立網格
+	const mesh = new THREE.Mesh(geometry2, material2)
+	return mesh
+}
