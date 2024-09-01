@@ -171,7 +171,7 @@ async def add_postcards(request: Request):
 
 			mydb.commit()
 			
-			await broadcast_queue_update([postcard_id,], 'add')
+			await broadcast_queue_update([postcard_id,], myjwtx["name"], 'add')
 
 			return JSONResponse(status_code=200, content={
 					"name": myjwtx["name"], 
@@ -756,9 +756,9 @@ async def send_all_queue(ws: WebSocket) :
 		print("發生錯誤 : ", e)
 
 
-async def broadcast_queue_update(postcard_id : list, action : str) :
+async def broadcast_queue_update(postcard_id : list, mailFrom : list, action : str) :
 	try :
-		message = [{'postcardID': postcard_id, 'action': action}]
+		message = [{'postcardID': postcard_id, 'mailFrom' : mailFrom, 'action': action}]
 		message_str = json.dumps(message)
 		await manager.broadcast(message_str)
 	except Exception as e :
