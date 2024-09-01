@@ -42,7 +42,7 @@ scene.add(earth)
 // 星星的軌道
 let radius = 7
 const ring1 = new THREE.Mesh(
-	new THREE.RingGeometry(radius, 6.95, 70, 1, 0),
+	new THREE.RingGeometry(radius, 6.99, 70, 1, 0),
 	new THREE.MeshPhysicalMaterial({ 
 	  color: "#FFCB8E",
 	  roughness: 0.25,
@@ -59,10 +59,24 @@ earth.add(ring1);
 // console.log("檢查",ring1.rotation);
 // console.log("檢查",ring1.material);
 
+const ring2 = new THREE.Mesh(
+	new THREE.RingGeometry(radius, 6.99, 70, 1, 0),
+	new THREE.MeshPhysicalMaterial({ 
+	  color: "#FFCB8E",
+	  roughness: 0.25,
+	  side: THREE.DoubleSide,
+	  transparent: true,
+	  opacity: 0.35,
+	})
+  )
+ring2.position.set(0, 0, 0)
+ring2.rotation.x = Math.PI/2
+earth.add(ring2);
+
 
 // 建立衛星模型
 const satellite = new THREE.Mesh(
-	new THREE.SphereGeometry(0.2, 32, 32),
+	new THREE.SphereGeometry(0.1, 32, 32),
 	new THREE.MeshBasicMaterial({ 
 		color : 0x696969,
 		map : new THREE.TextureLoader().load('./static/image/latlon-base-map.png')
@@ -71,6 +85,16 @@ const satellite = new THREE.Mesh(
 ring1.add(satellite)
 satellite.position.set(radius, 0, 0)
 
+
+const satellite2 = new THREE.Mesh(
+	new THREE.SphereGeometry(0.1, 32, 32),
+	new THREE.MeshBasicMaterial({ 
+		color : 0x696969,
+		map : new THREE.TextureLoader().load('./static/image/latlon-base-map.png')
+	 })
+)
+ring2.add(satellite2)
+satellite2.position.set(radius, 0, 0)
 
 
 camera.position.z = 10
@@ -230,7 +254,8 @@ let clock = new THREE.Clock();
 function animate() {
 	requestAnimationFrame(animate)
 	earth.rotation.y += 0.001; // 地球轉速
-
+	ring1.rotation.z += 0.009;
+	ring2.rotation.z += 0.007;
 
 	
 
