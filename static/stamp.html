@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Postcards 3D</title>
+    <title>郵票</title>
 	<link rel="stylesheet" href="/static/style.css">
 	<link rel="stylesheet" href="/static/menu.css">
 	<link rel="stylesheet" href="/static/on-off-button.css">
@@ -37,6 +37,9 @@
 		.home-link {
 			color: rgb(211, 217, 236);
 		}
+		#toggle-btn {
+			color : #666;
+		}
 		body { margin: 0; }
 		canvas {
 			width: 100%;
@@ -46,28 +49,14 @@
 	</style>
 </head>
 <body>
+	<div id="loginRequire" style="display: none;"></div>
 	<div class="overlay" id="overlay"></div>
 
-		<!-- Sidebar -->
-		<div id="mySidebar" class="sidebar" style="display: none;">
-			<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-			<a href="/collections"><i class="fa fa-envelope"></i> <span class="d-none d-md-inline">我的信箱</span><span id="unreadCount" class="unread">0</span></a>
-			<a href="/mystamps" <i class="fa fa-copy"></i> <span class="d-none d-md-inline">我的郵票</span></a>
-			<!-- <a href="#" <i class="fa fa-pencil"></i> <span class="d-none d-md-inline">我的草稿</span></a> -->
-			<!-- <a href="#" onclick="ranking(event)"><i class="fa-solid fa-medal"></i> <span class="d-none d-md-inline">排行榜</span></a> -->
-			<a href="/history" <i class="fa fa-clock-o"></i> <span class="d-none d-md-inline">歷史紀錄</span></a>
-			<!-- <a href="#" <i class="fa fa-th"></i> <span class="d-none d-md-inline">造訪其他收藏</span></a>
-			<a href="#" <i class="fa fa-paper-plane"></i> <span class="d-none d-md-inline">朋友的通知</span></a>
-			<a href="#" <i class="fa fa-heart"></i> <span class="d-none d-md-inline">友站連結</span></a>
-			<a href="#" <i class="fa fa-gear"></i> <span class="d-none d-md-inline">設定</span></a>
-			<a href="#" <i class="fa fa-star"></i> <span class="d-none d-md-inline">公告</span></a> -->
-			<!-- <a href="/about" <i class="fa fa-question"></i> <span class="d-none d-md-inline">關於</span></a> -->
-		</div>
 
 	<nav>
 		<div class="nav-group">
 			<div class="nav-group-left">
-				<span id="toggle-btn" onclick="toggleSidebar(false)" style="visibility:hidden;">&#9776; </span>	
+				<span id="toggle-btn" onclick="toggleSidebar(false)">&#9776; </span>	
 				<a class="home-link" href="/home"><img style="width: 41px; vertical-align: middle;" src="/static/image/post-card.png">Project-July Postcards</a>
 			</div>        
 			<div class="nav-group-right">
@@ -84,8 +73,7 @@
 		<h1>登入會員帳號</h1>
 		<input type="text"  id = "email" class = "popup-input" placeholder="輸入電子信箱">
 		<input type="password"  id = "password" class = "popup-input" placeholder="輸入密碼">
-		<button class = "popup-btn" type="button" onclick="signin()">登入我的帳戶</button>
-		<button class = "test-popup-btn" type="button" onclick="quickSignin()">登入體驗帳戶</button>
+		<button class = "popup-btn" type="button" onclick="signin()">登入帳戶</button>
 		<p class="center-text">還沒有帳戶？<span class="change-card" onclick="showRegister()">點此註冊</span></p>
 		<p id="note2" class="note center-text"></p>
 		</div>
@@ -107,15 +95,47 @@
 	</nav>
 
 	<div name="placeholder" style="height:50px;"></div>
-	<div id="mapid" style="width: 100vw; max-height: calc(100vh-50px);"></div>
 
-	<!-- 動態視窗 -->
-	<div id="popupEl" class="popup">
-		<h2>
-			<span id="popupTitleEl"></span>
-			<span>Title</span>
-		</h2>
-		<p id="textEl" class="popupText">Text</p>
+	<div class = 'flexDiv'>
+
+			<!-- Sidebar -->
+			<div id="mySidebar" class="sidebarX">
+				<!-- <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a> -->
+				<a href="/collections"><i class="fa fa-envelope"></i> <span class="d-none d-md-inline">我的信箱</span><span id="unreadCount" class="unread">0</span></a>
+				<a href="/mystamps" <i class="fa fa-copy"></i> <span class="d-none d-md-inline">我的郵票</span></a>
+				<!-- <a href="#" <i class="fa fa-pencil"></i> <span class="d-none d-md-inline">我的草稿</span></a> -->
+				<!-- <a href="#" onclick="ranking(event)"><i class="fa-solid fa-medal"></i> <span class="d-none d-md-inline">排行榜</span></a> -->
+				<a href="/history" <i class="fa fa-clock-o"></i> <span class="d-none d-md-inline">歷史紀錄</span></a>
+				<!-- <a href="#" <i class="fa fa-th"></i> <span class="d-none d-md-inline">造訪其他收藏</span></a>
+				<a href="#" <i class="fa fa-paper-plane"></i> <span class="d-none d-md-inline">朋友的通知</span></a>
+				<a href="#" <i class="fa fa-heart"></i> <span class="d-none d-md-inline">友站連結</span></a>
+				<a href="#" <i class="fa fa-gear"></i> <span class="d-none d-md-inline">設定</span></a>
+				<a href="#" <i class="fa fa-star"></i> <span class="d-none d-md-inline">公告</span></a> -->
+				<!-- <a href="/about" <i class="fa fa-question"></i> <span class="d-none d-md-inline">關於</span></a> -->
+			</div>
+
+			<div class="container1200">
+
+				<!-- 郵票 -->
+				<div id="stamp-page">
+		
+					<!-- Footprint Section -->
+					<div class="stamp-category" id="region-stamps">
+						<h2>區域風格郵票</h2>
+						<p>收到來自不同地區朋友的明信片，即可解鎖不同的區域郵票。</p>
+						<!-- 渲染Footprint郵票 -->
+					</div>
+				
+					<!-- Event Section -->
+					<div class="stamp-category" id="nonstop-stamps">
+						<h2>成就解鎖郵票</h2>
+						<p>寄出愈多張明信片，即可解鎖不同種類的郵票。</p>
+						<!-- 渲染Non-stop成就郵票 -->
+					</div>
+		
+				</div>
+			</div>
+
 	</div>
 
 	<!-- 功能表單展開視窗 -->
@@ -164,22 +184,11 @@
 	</div>
 
 	<!-- 其他功能按鈕 -->
-
-	<div id="rank-info">
-		<button type="button" id="rank-info_btn" onclick="ranking(event)"><div id="hover-bg"></div><img style="width: 65px; z-index: 1;" src="/static/image/ranking-icon.png">
-			<div><p style="padding: 5px 10px; background-color: greenyellow; border-radius: 10px; font-weight: 1000;">Top 10 排行榜</p></div>
-		</button>
-	</div>
-
 	<div id="postcard">
-		<button type="button" id="action_btn"><div id="hover-bg"></div><img style="width: 65px; z-index: 1;" src="/static/image/mailbunny.png">
+		<button type="button" id="action_btn"><img style="width: 65px;" src="/static/image/mailbunny.png">
 			<div><p style="padding: 5px 10px; background-color: greenyellow; border-radius: 10px; font-weight: 1000;">寄封明信片吧！</p></div>
 		</button>
 	</div>
-
-	<!-- <div id="createcard">
-		<button type="button"> <i class="fa fa-pencil"></i></button>
-	</div> -->
 
 	<footer class="footer">Copyright 	&#169;  Project-July</footer>
 
@@ -196,18 +205,11 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
-	<script type="module" src="static/earth3d.js"></script>
-	<script type="module" src="static/websocket.js"></script>
+	<script src="/static/stamp.js"></script>
 	<script>
-	document.addEventListener('DOMContentLoaded', async function(){
-		await checkLoginStatus()
-		const sidebar = document.getElementById("mySidebar");
-		const toggleBtn = document.getElementById("toggle-btn");
-		console.log("檢查 isLogin :",isLogin)
-		if (isLogin) {
-			sidebar.style.display = "block";
-			toggleBtn.style.visibility = "visible";
-		}
+	document.addEventListener('DOMContentLoaded', function(){
+		checkLoginStatus()
+		renderStamps()
 	})
 	</script>
 </body>

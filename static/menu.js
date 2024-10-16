@@ -1,25 +1,41 @@
 $(document).ready(function() {
 
-	// Function to fetch country data and populate select menu
+	// Function to fetch country data
 	function country() {
-	  fetch('/countries.json', {
+		fetch('/static/allcountry.json', {
 		method: 'GET'
-	  })
-	  .then(response => response.json())
-	  .then(json => {
+		})
+		.then(response => response.json())
+		.then(json => {
 		// Loop to get country list
-		json.features.forEach(function(feature) {
-		  $('#country-select').append('<option value="'+feature.properties.name+'">'+feature.properties.name+'</option>');
-		});
-	  })
-	  .catch(error => {
-		console.error('Error fetching countries:', error);
-	  });
+		json.forEach(function(country) {
+			$('#country-select').append('<option value='+country.cca3+'>'+country.name.common+'</option>')
+		})
+
+		// Event listener : 根據 selectedCountry 更新 hidden region input	
+		$('#country-select').on('change', function() {
+			const selectedCountryCode = $(this).val()
+			const selectedCountry = json.find(c => c.cca3 === selectedCountryCode)
+			if (selectedCountry) {
+			$('#region').val(selectedCountry.region)
+			// console.log("對應地區：",selectedCountry.region)
+			}
+		})
+
+		})
+		.catch(error => {
+		console.error('Error fetching countries:', error)
+		})
+
+
 	}
   
 
+
+	// 改成全域函式
+	window.newAction = function() {
 	// Function to initialize modal dialog
-	function newAction() {
+	// function newAction() {
 	  var dialog = $( "#dialog" ).dialog({
 		autoOpen: false,
 		modal: true,
@@ -29,9 +45,13 @@ $(document).ready(function() {
 			addpostcard(form[0]);
 			$( this ).dialog( "close" );
 		  },
-		  '寄出(指定收件人)': function() {
-			mailto(form[0]);
-			$( this ).dialog( "close" );
+		  '寄出(指定收件人)': async function() {
+			const result = await mailto(form[0])
+			console.log("檢查 mailto result:", result);
+			if (result) {
+				alert("信件成功寄出囉，但是需要一點時間才會寄達！")
+				$( this ).dialog( "close" )
+			}
 		  },
 		  '取消': function() {
 			$( this ).dialog( "close" );
@@ -58,11 +78,54 @@ $(document).ready(function() {
 			if (isLoggedIn) {
 				dialog.dialog("open");
 				console.log('dialog open');
+				chooseStamp()
 			} else {
 				alert("請先註冊或登入，才可以使用寄信功能！");
 			}
 		});
 	}
+
+
+
+	// 選擇郵票
+	function chooseStamp() {
+		const token = localStorage.getItem('token')
+		fetch('/api/stamps', {
+			method: 'GET',
+			headers: {'Authorization': `Bearer ${token}`}
+			})
+			.then(response => response.json())
+			.then(data => {
+				console.log(data.unlock)
+
+				const chooseStamp = document.getElementById('choose-stamp')
+				chooseStamp.innerHTML = ""
+
+				data.unlock.forEach(stamp => {
+					console.log(stamp)
+					const stampDiv = document.createElement('div')
+					stampDiv.className = "stampDiv"
+					const stampImg = document.createElement('img')
+					stampImg.className = "stampImg"
+					stampDiv.classList.add('stamp')
+					stampImg.src = stamp.image_url
+					stampDiv.appendChild(stampImg)
+					chooseStamp.appendChild(stampDiv)
+
+					// Event listener : 根據 click 	
+					$(stampDiv).on('click', function() {
+
+						addStamp(stamp.image_url)
+
+					})
+				})
+		})
+	}
+
+
+
+
+
 
 
 	async function addpostcard(dialog) {
@@ -192,24 +255,49 @@ $(document).ready(function() {
 
 		console.log(jsonformData)
 
-
-		fetch("/api/mailto", {
-			headers: {
-				'Authorization': `Bearer ${token}`, // 將 JWT 放在 Authorization Header 中
+		// 修正
+		try {
+			const response = await fetch("/api/mailto", {
+			  headers: {
+				'Authorization': `Bearer ${token}`,
 				'Content-Type': 'application/json'
-			},
-			method: "POST",
-			body: JSON.stringify(jsonformData)
-		})
-		.then(response => response.json())
-		.then(data => {
-			if (data.data.ok) {
-				console.log("Form寄送成功:", data);
-			}
-		})
-		.catch(error => {
-		  console.error("Form寄送失敗:", error);
-		});
+			  },
+			  method: "POST",
+			  body: JSON.stringify(jsonformData)
+			});
+		
+			const data = await response.json()
+			console.log("Form寄送成功:", data)
+			return data
+		  } catch (error) {
+			console.error("郵件傳送錯誤", error)
+			return null 
+		  }
+		
+
+		// fetch("/api/mailto", {
+		// 	headers: {
+		// 		'Authorization': `Bearer ${token}`, // 將 JWT 放在 Authorization Header 中
+		// 		'Content-Type': 'application/json'
+		// 	},
+		// 	method: "POST",
+		// 	body: JSON.stringify(jsonformData)
+		// })
+		// .then(response => response.json())
+		// .then(data => {
+		// 	if (data.data.ok) {
+		// 		console.log("Form寄送成功:", data)
+		// 		return true // 回傳成功狀態
+		// 	} 
+		// 	else {
+		// 		console.log("寄送失敗，請再試一次", data)
+		// 		return false // 回傳失敗狀態
+		// 	}
+		// })
+		// .catch(error => {
+		//   console.error("Form寄送失敗:", error)
+		//   return false // 回傳失敗狀態
+		// })
 	  }	  
 
 	// Invoke the functions

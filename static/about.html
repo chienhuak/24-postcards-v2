@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Postcards 3D</title>
+    <title>關於網站</title>
 	<link rel="stylesheet" href="/static/style.css">
 	<link rel="stylesheet" href="/static/menu.css">
 	<link rel="stylesheet" href="/static/on-off-button.css">
@@ -37,37 +37,27 @@
 		.home-link {
 			color: rgb(211, 217, 236);
 		}
-		body { margin: 0; }
-		canvas {
-			width: 100%;
-			min-height: 600px; 
-			display: block; 
+		#toggle-btn {
+			color : #666;
 		}
+		body { margin: 0; }
+
+		.introDiv {
+			/* background-color: antiquewhite;  */
+			padding: 10px; 
+			margin: 10px 0px; 
+			border-radius: 15px; 
+			border: solid 2px pink;}
 	</style>
 </head>
 <body>
 	<div class="overlay" id="overlay"></div>
 
-		<!-- Sidebar -->
-		<div id="mySidebar" class="sidebar" style="display: none;">
-			<a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-			<a href="/collections"><i class="fa fa-envelope"></i> <span class="d-none d-md-inline">我的信箱</span><span id="unreadCount" class="unread">0</span></a>
-			<a href="/mystamps" <i class="fa fa-copy"></i> <span class="d-none d-md-inline">我的郵票</span></a>
-			<!-- <a href="#" <i class="fa fa-pencil"></i> <span class="d-none d-md-inline">我的草稿</span></a> -->
-			<!-- <a href="#" onclick="ranking(event)"><i class="fa-solid fa-medal"></i> <span class="d-none d-md-inline">排行榜</span></a> -->
-			<a href="/history" <i class="fa fa-clock-o"></i> <span class="d-none d-md-inline">歷史紀錄</span></a>
-			<!-- <a href="#" <i class="fa fa-th"></i> <span class="d-none d-md-inline">造訪其他收藏</span></a>
-			<a href="#" <i class="fa fa-paper-plane"></i> <span class="d-none d-md-inline">朋友的通知</span></a>
-			<a href="#" <i class="fa fa-heart"></i> <span class="d-none d-md-inline">友站連結</span></a>
-			<a href="#" <i class="fa fa-gear"></i> <span class="d-none d-md-inline">設定</span></a>
-			<a href="#" <i class="fa fa-star"></i> <span class="d-none d-md-inline">公告</span></a> -->
-			<!-- <a href="/about" <i class="fa fa-question"></i> <span class="d-none d-md-inline">關於</span></a> -->
-		</div>
 
 	<nav>
 		<div class="nav-group">
 			<div class="nav-group-left">
-				<span id="toggle-btn" onclick="toggleSidebar(false)" style="visibility:hidden;">&#9776; </span>	
+				<span id="toggle-btn" onclick="toggleSidebar(true)" style="visibility: hidden;">&#9776; </span>	
 				<a class="home-link" href="/home"><img style="width: 41px; vertical-align: middle;" src="/static/image/post-card.png">Project-July Postcards</a>
 			</div>        
 			<div class="nav-group-right">
@@ -99,7 +89,6 @@
 		<select id="country-select" name="country" class = "popup-input">
 			<option value="">（選擇國家）</option>
 		</select>
-		<input type="hidden" name="region" id = "region" class = "popup-input" placeholder="隱藏欄位(動態填值)">
 		<button class = "popup-btn" onclick="register()">註冊</button>
 		<p class="center-text"><span class="change-card" onclick="showSignin()">已經有帳戶了？點此登入</span></p>
 		<p id="note" class="note center-text"></p>
@@ -107,15 +96,92 @@
 	</nav>
 
 	<div name="placeholder" style="height:50px;"></div>
-	<div id="mapid" style="width: 100vw; max-height: calc(100vh-50px);"></div>
 
-	<!-- 動態視窗 -->
-	<div id="popupEl" class="popup">
-		<h2>
-			<span id="popupTitleEl"></span>
-			<span>Title</span>
-		</h2>
-		<p id="textEl" class="popupText">Text</p>
+	<div class = 'flexDiv'>
+
+			<!-- Sidebar -->
+			<div id="mySidebar" class="sidebarX" style="display:none;">
+				<!-- <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a> -->
+				<a href="/collections"><i class="fa fa-envelope"></i> <span class="d-none d-md-inline">我的信箱</span><span id="unreadCount" class="unread">0</span></a>
+				<a href="/mystamps" <i class="fa fa-copy"></i> <span class="d-none d-md-inline">我的郵票</span></a>
+				<!-- <a href="#" <i class="fa fa-pencil"></i> <span class="d-none d-md-inline">我的草稿</span></a> -->
+				<!-- <a href="#" onclick="ranking(event)"><i class="fa-solid fa-medal"></i> <span class="d-none d-md-inline">排行榜</span></a> -->
+				<a href="/history" <i class="fa fa-clock-o"></i> <span class="d-none d-md-inline">歷史紀錄</span></a>
+				<!-- <a href="#" <i class="fa fa-th"></i> <span class="d-none d-md-inline">造訪其他收藏</span></a>
+				<a href="#" <i class="fa fa-paper-plane"></i> <span class="d-none d-md-inline">朋友的通知</span></a>
+				<a href="#" <i class="fa fa-heart"></i> <span class="d-none d-md-inline">友站連結</span></a>
+				<a href="#" <i class="fa fa-gear"></i> <span class="d-none d-md-inline">設定</span></a>
+				<a href="#" <i class="fa fa-star"></i> <span class="d-none d-md-inline">公告</span></a> -->
+				<!-- <a href="/about" <i class="fa fa-question"></i> <span class="d-none d-md-inline">關於</span></a> -->
+			</div>
+
+			<div class="container1200">
+
+				<h2>關於 Project-July Postcards 專案</h2>
+				<div class="introDiv">
+					<h3>Intro</h3>
+
+					<p>這是一個讓用戶以線上明信片交流的網站，我們想要用網頁實現寄收明信片的樂趣。
+						當您寄出一封信，對方不會像在通訊軟體一樣馬上收到這封信，希望大家寄出前可以用心編輯，並在寄出信件後耐心等候。</p>
+	
+					<p>為了讓寄信過程更有趣，我們設計了解鎖成就的機制，當使用者觸發成就條件，就能解鎖不同風格的郵票，並使用在明信片上。
+						用戶也可以自行編輯明信片的圖片或文字，讓明信片更有特色。</p>
+	
+					<p>網站內建有配對機制，您可能收到來自各個不同角落的用戶的問候，希望大家可以每次使用這個網站時都能收到一些小驚喜。
+					
+					<p>當您寄出一封隨機配對的明信片，就會立即顯示在首頁動畫中，在這裡你可以看到所有正在配送中的明信片。</p>
+	
+					<p>當您收到信後，寄件人就會顯示為您的聯絡人，回覆後就可以互相通信囉！</p>
+
+					<a class="about2home-a" style="text-decoration: none;" href="/home">前往首頁</a>
+				</div>
+
+				<div class="introDiv">
+					<h3>Supported Features</h3>
+					<li> 收信匣</li>
+					<li> 明信片編輯</li>
+					<li> 寄信機制 (隨機配對/指定收件人)</li>
+					<li> 郵票機制</li>
+					<li> 解鎖成就機制</li>
+					<li> 追蹤 (我的歷史查詢/即時顯示等待配對信件)</li>
+				</div>
+
+				<!-- <div class="introDiv">
+					<h3>Developing</h3>
+					<li>會員頁。</li>
+					<li>草稿頁。</li>
+					<li>編輯頁。</li>
+					<li>郵戳機制。</li>
+				</div>
+
+				<div class="introDiv">
+					<h3>Known Issue</h3>
+					<li>明信片編輯 (文字編輯不友善)</li>
+					<li>首頁動畫 (尚未填入hover彈出視窗的訊息內容、同一個座標顯示多張明信片造成畫面閃爍)</li>
+					<li>登入流程 (需依照登入狀態，判斷側欄顯示功能)</li>
+					<li>寄件流程 (需判斷有貼郵票才能寄出)</li>
+				</div>
+
+				<div class="introDiv">
+					<h3>Furture Features</h3>
+					<li>消息通知 (離線也要收到)。</li>
+					<li>依照地理位置，模擬寄件時間。</li>
+					<li>公開信布告欄。</li>
+					<li>旅行功能，依照經緯度判斷用戶是否位於註冊的國家，如果用戶位置顯示為旅行中，觸發解鎖旅行成就。</li>
+					<li>配對機制加入更多條件，例如：用戶設定、興趣、地理位置、語言...等等。</li>
+					<li>新手教學。</li>
+					<li>手機版本。</li>
+				</div>
+
+				<div class="introDiv">
+					<h3>Fixed</h3>
+					<li> 9/6 修正明信片編輯 (視窗被導覽列擋住、還無法選擇郵票、背景圖存檔消失) </li>
+					<li> 9/6 修正寄件流程 (貼郵票流程、寄出成功提醒)</li>
+					<li> 9/6 解鎖郵票 - 寄信次數成就</li>
+					<li> 9/4 解鎖郵票 - 收信地區成就</li>
+				</div> -->
+			</div>
+
 	</div>
 
 	<!-- 功能表單展開視窗 -->
@@ -164,22 +230,11 @@
 	</div>
 
 	<!-- 其他功能按鈕 -->
-
-	<div id="rank-info">
-		<button type="button" id="rank-info_btn" onclick="ranking(event)"><div id="hover-bg"></div><img style="width: 65px; z-index: 1;" src="/static/image/ranking-icon.png">
-			<div><p style="padding: 5px 10px; background-color: greenyellow; border-radius: 10px; font-weight: 1000;">Top 10 排行榜</p></div>
-		</button>
-	</div>
-
 	<div id="postcard">
-		<button type="button" id="action_btn"><div id="hover-bg"></div><img style="width: 65px; z-index: 1;" src="/static/image/mailbunny.png">
+		<button type="button" id="action_btn"><img style="width: 65px;" src="/static/image/mailbunny.png">
 			<div><p style="padding: 5px 10px; background-color: greenyellow; border-radius: 10px; font-weight: 1000;">寄封明信片吧！</p></div>
 		</button>
 	</div>
-
-	<!-- <div id="createcard">
-		<button type="button"> <i class="fa fa-pencil"></i></button>
-	</div> -->
 
 	<footer class="footer">Copyright 	&#169;  Project-July</footer>
 
@@ -196,19 +251,17 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.4/gsap.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
-	<script type="module" src="static/earth3d.js"></script>
-	<script type="module" src="static/websocket.js"></script>
 	<script>
-	document.addEventListener('DOMContentLoaded', async function(){
-		await checkLoginStatus()
-		const sidebar = document.getElementById("mySidebar");
-		const toggleBtn = document.getElementById("toggle-btn");
-		console.log("檢查 isLogin :",isLogin)
-		if (isLogin) {
-			sidebar.style.display = "block";
-			toggleBtn.style.visibility = "visible";
-		}
-	})
+		document.addEventListener('DOMContentLoaded', async function(){
+			await checkLoginStatus()
+			const sidebar = document.getElementById("mySidebar");
+			const toggleBtn = document.getElementById("toggle-btn");
+			console.log("檢查 isLogin :",isLogin)
+			if (isLogin) {
+				sidebar.style.display = "block";
+				toggleBtn.style.visibility = "visible";
+			}
+		})
 	</script>
 </body>
 </html>

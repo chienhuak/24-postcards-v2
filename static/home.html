@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="/static/home-sidebar.css"> 
   <link rel="stylesheet" href="/static/func_popup.css"> 
 	<link rel="stylesheet" href="/static/painting.css"> 
+  <link rel="stylesheet" href="/static/stamp.css"> 
 
 	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
 
@@ -58,35 +59,21 @@
 </style>
 </head>
 <body>
+  <div id="loginRequire" style="display: none;"></div>
   <div class="overlay" id="overlay"></div>
-
-  <!-- Sidebar -->
-  <div id="mySidebar" class="sidebar">
-    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-    <a href="/collections"><i class="fa fa-envelope"></i> <span class="d-none d-md-inline">我的信箱</span><span id="unreadCount" class="unread">0</span></a>
-    <a href="#" <i class="fa fa-copy"></i> <span class="d-none d-md-inline">我的郵票</span></a>
-    <a href="#" <i class="fa fa-pencil"></i> <span class="d-none d-md-inline">我的草稿</span></a>
-    <a href="#" onclick="ranking(event)"><i class="fa-solid fa-medal"></i> <span class="d-none d-md-inline">排行榜</span></a>
-    <a href="/history" <i class="fa fa-clock-o"></i> <span class="d-none d-md-inline">歷史紀錄</span></a>
-    <a href="#" <i class="fa fa-th"></i> <span class="d-none d-md-inline">造訪其他收藏</span></a>
-    <a href="#" <i class="fa fa-paper-plane"></i> <span class="d-none d-md-inline">朋友的通知</span></a>
-    <a href="#" <i class="fa fa-heart"></i> <span class="d-none d-md-inline">友站連結</span></a>
-    <a href="#" <i class="fa fa-gear"></i> <span class="d-none d-md-inline">設定</span></a>
-    <a href="#" <i class="fa fa-star"></i> <span class="d-none d-md-inline">公告</span></a></div>
-
-  </div>
 
 	<nav>
 		<div class="nav-group">
-		<div class="nav-group-left">
-			<span id="toggle-btn" onclick="toggleSidebar()">&#9776; </span>	
-			<a class="home-link" href="/home"><img style="width: 41px; vertical-align: middle;" src="/static/image/post-card.png">Project-July Postcards</a>
-		</div>        
-		<div class="nav-group-right">
-			<a class = "a-style-1" href="/feed" onclick="toFeed()">留言板</a>
-			<a id = "signin-card" class = "a-style-1" href="" onclick="card(); return false;">登入/註冊</a>
-			<a id = "signout-btn" class = "a-style-1" href="" onclick="signout()">登出</a>
-		</div>
+			<div class="nav-group-left">
+				<span id="toggle-btn" onclick="toggleSidebar(false)">&#9776; </span>	
+				<a class="home-link" href="/home"><img style="width: 41px; vertical-align: middle;" src="/static/image/post-card.png">Project-July Postcards</a>
+			</div>        
+			<div class="nav-group-right">
+				<!-- <a class = "a-style-1" href="/feed" onclick="toFeed()">留言板</a> -->
+				<a class = "a-style-1" href="/about">關於網站</a>
+				<a id = "signin-card" class = "a-style-1" href="" onclick="card(); return false;">登入/註冊</a>
+				<a id = "signout-btn" class = "a-style-1" href="" onclick="signout()">登出</a>
+			</div>
 		</div>
 		<!-- pop up memu -->
 		<div class = "card">
@@ -106,10 +93,10 @@
 		<input type="text"  id = "namex" class = "popup-input" placeholder="輸入暱稱">
 		<input type="text"  id = "emailx" class = "popup-input" placeholder="輸入電子信箱">
 		<input type="password"  id = "passwordx" class = "popup-input" placeholder="輸入密碼">
-		<!-- <input type="text"  id = "countryx" class = "popup-input" placeholder="輸入國家"> -->
 		<select id="country-select" name="country" class = "popup-input">
 			<option value="">（選擇國家）</option>
 		</select>
+		<input type="hidden" name="region" id = "region" class = "popup-input" placeholder="隱藏欄位(動態填值)">
 		<button class = "popup-btn" onclick="register()">註冊</button>
 		<p class="center-text"><span class="change-card" onclick="showSignin()">已經有帳戶了？點此登入</span></p>
 		<p id="note" class="note center-text"></p>
@@ -117,26 +104,41 @@
 	</nav>
 
   <div name="placeholder" style="height:50px;"></div>
-  <div class="container1200">
 
-    <!-- 歷史資料追蹤區 -->
-    <div id="history-div">
-      <h3>歷史資料追蹤區</h3>
+	<div class = 'flexDiv'>
+
+    <!-- Sidebar -->
+    <div id="mySidebar" class="sidebarX">
+      <!-- <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a> -->
+      <a href="/collections"><i class="fa fa-envelope"></i> <span class="d-none d-md-inline">我的信箱</span><span id="unreadCount" class="unread">0</span></a>
+      <a href="/mystamps" <i class="fa fa-copy"></i> <span class="d-none d-md-inline">我的郵票</span></a>
+      <!-- <a href="#" <i class="fa fa-pencil"></i> <span class="d-none d-md-inline">我的草稿</span></a> -->
+      <!-- <a href="#" onclick="ranking(event)"><i class="fa-solid fa-medal"></i> <span class="d-none d-md-inline">排行榜</span></a> -->
+      <a href="/history" <i class="fa fa-clock-o"></i> <span class="d-none d-md-inline">歷史紀錄</span></a>
+      <!-- <a href="#" <i class="fa fa-th"></i> <span class="d-none d-md-inline">造訪其他收藏</span></a>
+      <a href="#" <i class="fa fa-paper-plane"></i> <span class="d-none d-md-inline">朋友的通知</span></a>
+      <a href="#" <i class="fa fa-heart"></i> <span class="d-none d-md-inline">友站連結</span></a>
+      <a href="#" <i class="fa fa-gear"></i> <span class="d-none d-md-inline">設定</span></a>
+      <a href="#" <i class="fa fa-star"></i> <span class="d-none d-md-inline">公告</span></a> -->
+      <!-- <a href="/about" <i class="fa fa-question"></i> <span class="d-none d-md-inline">關於</span></a> -->
     </div>
 
-    <!-- 地圖 -->
-    <div id="mapid" style="width: 1200px; height: 600px;"></div>
+    <div class="container1200">
 
+      <!-- 歷史資料追蹤區 -->
+      <div id="history-div">
+        <h3>歷史資料追蹤區</h3>
+      </div>
+
+      <!-- 地圖 -->
+      <h3>我的收件地圖</h3>
+      <div id="mapid" style="max-width: 1200px; height: 600px;"></div>
+
+      <h3>我的寄件地圖</h3>
+      <div id="mapid2" style="max-width: 1200px; height: 600px;"></div>
+
+    </div>
   </div>
-
-	<!-- 動態視窗 -->
-	<div id="popupEl" class="popup">
-		<h2>
-			<span id="popupTitleEl"></span>
-			<span>Title</span>
-		</h2>
-		<p id="textEl" class="popupText">Text</p>
-	</div>
 
 	<!-- 功能表單展開視窗 -->
 	<div id="func_popupEl" class="popup2">
@@ -150,20 +152,44 @@
 	<!-- 寄送明信片編輯框 -->
 	<div id="dialog" title="編輯中...">
 		<div id="paper"></div>
-		<div id="canvas-controls">
-			<button id="add-text">Add Text</button>
+		<div class = 'flexDiv'>
+			<div id="choose-stamp" title="選擇郵票">
+
+			</div>
+		</div>
+		<div id="canvas-controls" class = "flexDiv">
+			<button id="add-text" class="nowrap">Add Text</button>
 			<button id="add-image" style="display: none;">Add Image</button>
 			<input type="file" id="upload-image" accept="image/*">
-			<button id="save">Save</button>
+			<!-- <button id="save">Save</button> -->
 		</div>
+
+
 		<form>
+		
+		<!-- <fieldset class="ui-helper-reset">
+		<label for="img_upload">Photo</label>
+		<input id="img_upload" name="img_upload" type="file">
+		<label for="tab_title">Title</label>
+		<input type="text" name="tab_title" id="tab_title" value="Tab Title" class="ui-widget-content ui-corner-all">
+		<label for="tab_content">Content</label>
+		<textarea name="tab_content" id="tab_content" class="ui-widget-content ui-corner-all">輸入一點訊息</textarea> -->
+		<!-- Rounded switch -->
+		<!-- <label>Random Mode</label>
+		<label class="switch">
+			<input type="checkbox">
+			<span class="slider round"></span>
+		</label>
+		</fieldset> -->
 		
 		</form>
 	</div>
 
 	<!-- 其他功能按鈕 -->
 	<div id="postcard">
-		<button type="button" id="action_btn"><i class="fa fa-envelope"></i></button>
+		<button type="button" id="action_btn"><img style="width: 65px;" src="/static/image/mailbunny.png">
+			<div><p style="padding: 5px 10px; background-color: greenyellow; border-radius: 10px; font-weight: 1000;">寄封明信片吧！</p></div>
+		</button>
 	</div>
 
 
@@ -184,7 +210,8 @@
     <script>
       document.addEventListener('DOMContentLoaded', function(){
         checkLoginStatus()
-        map_marker()
+        map_marker(mymap,'/api/collections')
+        map_marker(mymap2,'/api/historymap')
       })
     </script>
 </body>

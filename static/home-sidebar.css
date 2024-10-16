@@ -1,7 +1,9 @@
 /* Sidebar container */
 .sidebar {
-	height: 60%;
-	width: 0;
+	/* height: 60%; */
+	height: auto;
+	/* width: 0; */
+	width: 200px;
 	position: fixed;
 	top: 50%; /* Position it at the middle of the screen */
 	transform: translateY(-50%); /* Adjust it to be vertically centered */
@@ -12,7 +14,10 @@
 	transition: 0.5s;
 	padding-top: 60px;
 	z-index: 10000;
+	text-wrap: nowrap;
 }
+
+
 
 /* Sidebar links */
 .sidebar a {
@@ -57,3 +62,40 @@
 	color: #111;
 	padding: 10px 20px;
 }
+
+
+.flexDiv {
+	display: flex;
+	flex-direction: row;
+    margin: 0;
+}
+
+.sidebarX {
+	position: sticky;
+	top: 50px; 
+	height: auto;
+	width: 200px;
+	left: 0;
+	background-color: rgba(9, 19, 50, 1); /* 不透明 */
+	overflow-x: hidden;
+	transition: 0.5s;
+	padding-top: 60px;
+	z-index: 10000;
+	text-wrap: nowrap;
+}
+
+.sidebarX a {
+	padding: 10px 15px;
+	text-decoration: none;
+	font-size: 18px;
+	color: rgb(211, 217, 236, 0.5);
+	display: block;
+	transition: 0.3s;
+	border : solid pink 0.5;
+}
+
+
+#toggle-btn {
+	color : #666;
+}
+

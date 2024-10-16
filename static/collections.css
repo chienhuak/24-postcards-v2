@@ -1,0 +1,141 @@
+#container2 {
+	display: grid; /* 使用 Grid 布局 */
+    grid-template-columns: repeat(2, 1fr); /* 每行兩列 */
+    gap: 10px 40px; /* 第一個值是 row gap，第二個是 column gap */
+    /* display:flex; */
+    max-width: 1200px;
+    width: 65%;
+    /* flex-wrap: wrap; */
+    justify-content: center;
+    /* border: solid pink 2px; */
+    margin: auto;
+    box-sizing: border-box;
+	height : auto;
+}
+
+#mail-postcard-box {
+	margin: 50px 10px;
+	width: 100%;
+	border: solid 1px orange;
+	background-color: rgb(241, 241, 233);
+}
+
+#mail-contact-box {
+	margin: 50px 10px;
+	min-width: 200px;
+	border: solid 1px orange;
+}
+
+.imgbox {
+    min-width: 270px;
+    height: auto;
+    position: relative;
+    border: solid rgba(128, 128, 128, 0.39) 1px;
+    margin: 10px;
+}
+
+.myphoto {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+.p1 {
+    position: absolute;
+    width:100%;
+    bottom: 0px; /* 距離圖片下緣的距離 */
+    color: rgb(255, 255, 255);
+    text-align: left;
+    background-color: rgba(0,0,0,0.6); /* 背景顏色及透明度 */
+    padding: 9px 5%; /* 文字框內的間距 */
+    margin: 0;
+    box-sizing: border-box;
+    overflow:hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.textbox {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* border: solid orange 3px; */
+    padding: 9px 5%;
+}
+
+
+.mailbox-title {
+	background-color: antiquewhite;
+	padding: 30px 10px;
+	text-align: center;
+	margin: 0;
+
+}
+
+.contact-item {
+	background-color: antiquewhite;
+	padding: 15px;
+	border: solid 4px rgb(246, 245, 243);
+	display: flex;
+	align-items: center;
+}
+
+.contact-item span {
+	height: 50px;
+	line-height: 50px;
+	margin-left: 15px;
+}
+
+.contact-item:hover {
+	background-color: rgb(241, 175, 93);
+}
+
+
+.contact-img {
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	overflow: hidden;
+	object-fit: cover; /* 保持比例、裁掉多出來的部分 */
+	border: solid 5px rgb(228, 230, 229);
+}
+
+.contactBtn {
+    padding: 5px 10px;
+    background-color: rgb(183, 216, 132);
+    border : solid 1px greenyellow;
+    border-radius : 10px;
+    margin-left : 5px;
+    cursor: pointer;
+}
+
+
+@media (max-width: 1200px){
+
+
+    /* #container2 {
+        width: 80%;
+    }      */
+
+
+	#container2 {
+		grid-template-columns: repeat(1, 1fr); 
+		gap: 10px; /* 設置列之間的間距 */
+	}
+
+    .imgbox {
+        width: 100%;
+        height: auto;
+    }
+
+    #mail-postcard-box {
+        min-width: 360px;
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+
+}

@@ -4,7 +4,7 @@ var graph = new joint.dia.Graph;
 var paper = new joint.dia.Paper({
 	el: document.getElementById('paper'),
 	model: graph,
-	width: 600,
+	width: 610,
 	height: 433,
 	gridSize: 10,
 	drawGrid: true,
@@ -15,25 +15,71 @@ var paper = new joint.dia.Paper({
 });
 
 
-// 畫布 OK 就顯示的圖片
-// var text = new joint.shapes.standard.TextBlock();
-// text.position(50, 50);
-// text.resize(100, 40);
-// text.attr('label/text', 'Click me!');
-// text.addTo(graph);
-var imaged = new joint.shapes.standard.Image();
-imaged.position(-28, -22.5);
-// image.resize(687, 400);
-// image.attr('image/xlinkHref', 'static/image/postcard_template.png'); 
-imaged.resize(656, 478);
-imaged.attr('image/xlinkHref', 'static/image/vintage-mailing-envelope.png'); 
-imaged.addTo(graph);
+// 背景圖
+var img = new Image();
+img.crossOrigin = 'anonymous'; // 啟用跨域請求
+img.src = '/static/image/vintage-mailing-envelope.png'
+
+img.onload = function() {
+    // 將圖片加載到 Canvas
+    var canvas = document.createElement('canvas')
+    var ctx = canvas.getContext('2d')
+    canvas.width = img.width
+    canvas.height = img.height
+    ctx.drawImage(img, 0, 0)
+
+    // 將 Canvas 轉為 Base64 URL，並使用 JointJS 添加到畫布上
+    var imaged = new joint.shapes.standard.Image()
+    imaged.position(-30, -85)
+    imaged.resize(670, 600)
+    imaged.attr({
+        image: {
+            xlinkHref: canvas.toDataURL(), // 使用轉換後的 base64 URL
+        }
+    })
+    imaged.addTo(graph)
+}
+
+
+// 貼郵票
+var stamp2canvas
+var imgStamp = new Image()
+imgStamp.crossOrigin = 'anonymous' // 啟用跨域請求
+
+function addStamp(url) {
+    if (stamp2canvas) {
+        stamp2canvas.remove()
+    }
+
+
+    imgStamp.src = url // 設置圖片 URL
+
+    imgStamp.onload = function() { // 當圖片加載完成後執行
+        // 創建一個 Canvas 並將圖片加載到 Canvas
+        var canvas = document.createElement('canvas')
+        var ctx = canvas.getContext('2d')
+        canvas.width = imgStamp.width
+        canvas.height = imgStamp.height
+        ctx.drawImage(imgStamp, 0, 0)
+    
+    var stamp2canvas = new joint.shapes.standard.Image()
+    stamp2canvas.position(405, 30)
+    stamp2canvas.resize(130, 200)
+    stamp2canvas.attr({
+        image: {
+            xlinkHref: canvas.toDataURL(), // 使用轉換後的 base64 URL
+        }
+    })
+    stamp2canvas.addTo(graph)
+    }
+}
 
 
 var lastElement;
 var selectedElement;
 
 paper.on('element:pointerclick', function(elementView) {
+
     var element = elementView.model;
     selectedElement = elementView.model;
     
@@ -131,12 +177,14 @@ function addImage() {
 }
 
 
+
 // 圖片上傳
 $('#upload-image').on('change', function(event) {
     var file = event.target.files[0];
     if (file) {
         var reader = new FileReader();
         reader.onload = function(e) {
+            //console.log(e.target.result)
             var image = new joint.shapes.standard.Image();
             image.resize(345, 336);
             image.position(45, 55);
@@ -194,7 +242,7 @@ const ResizeTool = joint.elementTools.Control.extend({
 document.getElementById('save').addEventListener('click', function() {
     html2canvas(document.querySelector("#paper"), {
         useCORS: true, // 允許跨域請求
-        background: '#ffffff' // 背景色
+        // background: '#ffffff' // 背景色
     }).then(canvas => {
         canvas.toBlob(function(blob) {
             var formData = new FormData();
@@ -213,3 +261,4 @@ document.getElementById('save').addEventListener('click', function() {
         });
     });
 });
+

@@ -19,6 +19,8 @@ from botocore.exceptions import NoCredentialsError
 # 隨機
 import random
 from typing import List  # 資料型別提示
+# enable CORS on server 
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app=FastAPI(debug=True)
@@ -27,6 +29,17 @@ jwtkey = "iweorhfnen834"
 # 從環境變數中讀取 MySQL 密碼
 mysql_password = os.environ.get("MYSQL_PASSWORD")
 tappay_partner_key = os.environ.get("TAPPAY")
+
+# CORS config
+origins = ["*"]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # 設置 AWS S3 環境變數
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
@@ -113,10 +126,6 @@ async def home(request: Request):
 async def feed(request: Request):
 	return FileResponse("./static/feed.html", media_type="text/html")
 
-@app.get("/countries.json", include_in_schema=False)
-async def feed(request: Request):
-	return FileResponse("./static/countries.json", media_type="application/json")
-
 @app.get("/collections", include_in_schema=False)
 async def collections(request: Request):
 	return FileResponse("./static/collections.html", media_type="text/html")
@@ -128,6 +137,58 @@ async def feed(request: Request):
 @app.get("/history", include_in_schema=False)
 async def feed(request: Request):
 	return FileResponse("./static/home.html", media_type="text/html")
+
+@app.get("/mystamps", include_in_schema=False)
+async def feed(request: Request):
+	return FileResponse("./static/stamp.html", media_type="text/html")
+
+@app.get("/mydrafts", include_in_schema=False)
+async def feed(request: Request):
+	return FileResponse("./static/draft.html", media_type="text/html")
+
+@app.get("/about", include_in_schema=False)
+async def feed(request: Request):
+	return FileResponse("./static/about.html", media_type="text/html")
+
+
+# 我的郵票成就
+@app.get("/api/stamps", response_class=JSONResponse)
+async def stamps(request: Request):
+
+	auth_header = request.headers.get('Authorization')
+	if auth_header:
+		myjwt = auth_header.split(" ")[1] 
+		myjwtx = jwt.decode(myjwt,jwtkey,algorithms="HS256")
+
+	with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
+
+		queryAll = """
+		SELECT *
+		FROM stamps 
+		"""
+		mycursor.execute(queryAll)
+		result1 = mycursor.fetchall()
+		# print("所有郵票清單：",result1)
+
+		queryUnlock = """
+		SELECT s.stamp_id, s.image_url
+		FROM stamps s
+		LEFT JOIN user_stamp us on s.stamp_id = us.stamp_id 
+		WHERE s.unlock_value='free' OR us.user_id = %s
+		"""
+		mycursor.execute(queryUnlock,(myjwtx["id"],))
+		result2 = mycursor.fetchall()
+		# print("解鎖成就：",result2)
+		unlocked_stamp_id = {stamp["stamp_id"] for stamp in result2}
+
+		for stamp in result1:
+			if stamp["stamp_id"] not in unlocked_stamp_id:
+				stamp["image_url"] = "/static/image/lock-icon-2.png"
+
+	return {
+		"all": result1,
+		"unlock": result2,
+		}
 
 
 # 新增明信片
@@ -169,9 +230,12 @@ async def add_postcards(request: Request):
 				"""
 			mycursor.execute(query2, (postcard_id, myjwtx["name"], myjwtx["country"],))
 
+			# 解鎖持續寄信郵票
+			nonstop_stamp_unlock(mycursor, myjwtx["id"])
+
 			mydb.commit()
 			
-			await broadcast_queue_update([postcard_id,], myjwtx["name"], 'add')
+			await broadcast_queue_update([{'postcardID':postcard_id,'mailFrom':myjwtx["name"]}], 'add')
 
 			return JSONResponse(status_code=200, content={
 					"name": myjwtx["name"], 
@@ -179,6 +243,93 @@ async def add_postcards(request: Request):
 					"message": data["message"],
 					"latitude": data["latitude"],
 					"longitude": data["longitude"]})
+
+
+# 解鎖持續寄信郵票
+def nonstop_stamp_unlock(cursor : mysql.connector.cursor.MySQLCursorDict, userID : int) : 
+
+	# criteria
+	query5 = """
+		SELECT stamp_id, unlock_value
+		FROM stamps
+		WHERE cat = "nonstop"
+		"""
+	cursor.execute(query5)
+	criteriaList = cursor.fetchall()  # [{stamp_id:8,unlock_value:5},{stamp_id:9,unlock_value:20},{stamp_id:10,unlock_value:100}]
+	print("類別二解鎖條件:",criteriaList)
+
+	# 查詢寄件總數
+	query6 = """
+		SELECT count(p.mailFrom)
+		FROM postcards p
+		INNER JOIN postcard_users u on u.name = p.mailFrom
+		WHERE u.id = %s
+		GROUP BY mailFrom
+		"""
+	cursor.execute(query6, (userID,))
+	result6 = cursor.fetchone()  # 27
+	sentCount = int(result6['count(p.mailFrom)']) if result6 else 0  # 如果沒有寄信紀錄，設為 0
+	print("寄信總數:",sentCount)
+
+	# 查詢最新一筆解鎖紀錄
+	query7 = """
+		SELECT s.unlock_value
+		FROM user_stamp us
+		INNER JOIN stamps s on s.stamp_id = us.stamp_id
+		WHERE s.cat = "nonstop" AND us.user_id = %s
+		ORDER BY s.unlock_value ASC
+		LIMIT 1
+		"""
+	cursor.execute(query7, (userID,))
+	result7 = cursor.fetchone() # 20 OR None
+	reachUnlockValue = int(result7['unlock_value']) if result7 else 0  # 如果沒有解鎖紀錄，預設為 0
+	print("解鎖紀錄最大值:",reachUnlockValue)
+
+	# 判斷是否應該解鎖新的成就
+	for criteria in criteriaList :
+		stamp_id = criteria['stamp_id']
+		unlock_value = int(criteria['unlock_value'])
+
+		# 如果寄件總數達到了新的標準，且未解鎖該成就
+		if sentCount >= unlock_value and unlock_value > reachUnlockValue :
+			# 解鎖該成就，插入 user_stamp 表
+			query8 = """
+				INSERT INTO user_stamp (user_id, stamp_id)
+				VALUES (%s, %s)
+			"""
+			cursor.execute(query8, (userID, stamp_id))
+			
+
+
+# 解鎖地區郵票
+def region_stamp_unlock(cursor : mysql.connector.cursor.MySQLCursorDict, postcardID : int) : 
+
+	query5 = """
+		SELECT t.id as receiverUid, f.region
+		FROM postcards p
+		INNER JOIN postcard_users f on f.name = p.mailFrom
+		INNER JOIN postcard_users t on t.name = p.mailTo
+		WHERE postcardID = %s
+		"""
+	cursor.execute(query5, (postcardID,))
+	user = cursor.fetchall()
+
+	query6 = """
+		SELECT s.stamp_id
+		FROM user_stamp us
+		INNER JOIN stamps s on s.stamp_id = us.stamp_id
+		WHERE us.user_id = %s and s.unlock_value=%s
+		LIMIT 1
+		"""
+	cursor.execute(query6, (user[0]['receiverUid'],user[0]['region']))
+	hasStamp = cursor.fetchall()
+
+	query7 = """
+		INSERT INTO user_stamp (user_id, stamp_id)
+		select %s, stamp_id from stamps where unlock_value = %s
+		"""
+	if not hasStamp :
+		cursor.execute(query7, (user[0]['receiverUid'],user[0]['region']))
 
 
 # 隨機配對，然後將配對結果回填到資料庫
@@ -259,17 +410,22 @@ async def random_matching(request: Request):
 				INSERT INTO notifications (type, ref)
 				VALUES ('newarrive', %s),('newarrive', %s)
 				"""
+
 			mycursor.execute(query1, (i[0],i[1]))
 			mycursor.execute(query2, (i[1],i[0]))
 			mycursor.execute(query3, (i[1],i[0]))
 			mycursor.execute(query4, (i[1],i[0]))
 
-			broadcast_del_list.append(i[0])
-			broadcast_del_list.append(i[1])
+			# 郵票解鎖
+			region_stamp_unlock(mycursor,i[0])
+			region_stamp_unlock(mycursor,i[1])	
+
+			broadcast_del_list.append({'postcardID':i[0]})
+			broadcast_del_list.append({'postcardID':i[1]})
 
 		mydb.commit()
 
-		broadcast_queue_update(broadcast_del_list, 'delete')
+		await broadcast_queue_update(broadcast_del_list, 'del')
 
 		return {
 			"ok": True
@@ -315,10 +471,14 @@ async def mailto(request: Request):
 				"""
 			mycursor.execute(query2, (postcard_id,))
 
+			# 解鎖地區郵票
+			region_stamp_unlock(mycursor, postcard_id)
+			# 解鎖持續寄信郵票
+			nonstop_stamp_unlock(mycursor, myjwtx["id"])
+
 			mydb.commit()
 
-			return JSONResponse(status_code=200, content={
-				"data": "ok"})
+			return JSONResponse(status_code=200, content={"data": {"ok": True}})
 			# return JSONResponse(status_code=200, content={
 			# 		"name": myjwtx["name"], 
 			# 		"country": myjwtx["country"], 
@@ -418,10 +578,10 @@ async def register(request: Request, data:dict):
 
 			else :
 				query = """
-				INSERT INTO postcard_users (name, username, password, country)
-				VALUES (%s, %s, %s, %s)
+				INSERT INTO postcard_users (name, username, password, country, region)
+				VALUES (%s, %s, %s, %s, %s)
 				"""
-				mycursor.execute(query, (data["name"],data["email"],data["password"],data["country"],))
+				mycursor.execute(query, (data["name"],data["email"],data["password"],data["country"],data["region"],))
 				mydb.commit()
 				return {
 					"ok": True
@@ -460,7 +620,7 @@ async def createMessage(request: Request, say: Optional[str] = Form(None), img_u
 
 
 		with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
-			query = "INSERT INTO message (member_id, content, img_link) VALUES (%s, %s, %s)"
+			query = "INSERT INTO postcard_msgboard (member_id, content, img_link) VALUES (%s, %s, %s)"
 			inputs = (myjwtx['id'], say, img_link)
 			mycursor.execute(query, inputs)
 
@@ -485,13 +645,14 @@ async def feed(request: Request):
 		with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
 			query = """
 			WITH board AS(
-				SELECT postcard_users.name, message.content, img_link, message.time, message.id, parent_id, LPAD(ifnull(parent_id,message.id), 3, '0') AS level
-				FROM message 
-				JOIN postcard_users ON message.member_id = postcard_users.id 
+				SELECT postcard_users.name, PM.content, img_link, PM.time, PM.msg_id, parent_id, LPAD(ifnull(parent_id,PM.msg_id), 3, '0') AS level
+				FROM postcard_msgboard PM
+				JOIN postcard_users ON PM.member_id = postcard_users.id 
 			)
 			SELECT * FROM board 
-			ORDER BY level,id
+			ORDER BY msg_id DESC
 			"""
+			# -- ORDER BY level,id 留言排序功能待更新
 			mycursor.execute(query)
 			result = mycursor.fetchall()
 			# print(result)
@@ -573,8 +734,49 @@ async def collections(request: Request, page:Optional[int]=0,keyword:Optional[st
 
 		query = """
 		SELECT *
-		FROM postcards 
+		FROM postcards p
+		INNER JOIN postcard_users u on p.mailFrom = u.name
 		WHERE (mailto = %s) 
+		ORDER BY postcardid desc
+		LIMIT %s OFFSET %s
+		"""
+		# mycursor.execute(query, (keyword, '%'+keyword+'%', page_size, page_size*page))   # 關鍵字搜尋
+		mycursor.execute(query, (myjwtx["name"], page_size, page_size*page))
+		results = mycursor.fetchall()
+
+	return {
+		"nextPage": page+1 if len(results) == 12 else None,
+		"data": results}
+
+
+# 我寄出的明信片
+@app.get("/api/historymap", response_class=JSONResponse)
+async def historymap(request: Request, page:Optional[int]=0,keyword:Optional[str]=""):
+
+	# 從 Authorization Header 中提取 token
+	auth_header = request.headers.get('Authorization')
+	if auth_header:
+		myjwt = auth_header.split(" ")[1] 
+
+		# 解碼 JWT
+		myjwtx = jwt.decode(myjwt,jwtkey,algorithms="HS256")
+
+	if page < 0:
+		return JSONResponse(status_code=500, content={
+			"error": True,
+			"message": "頁數錯誤"
+			}) 
+
+	with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
+
+		# 每頁顯示12條留言
+		page_size = 12
+
+		query = """
+		SELECT *
+		FROM postcards p
+		INNER JOIN postcard_users u on p.mailFrom = u.name
+		WHERE (mailFrom = %s) 
 		ORDER BY postcardid desc
 		LIMIT %s OFFSET %s
 		"""
@@ -739,16 +941,15 @@ async def send_all_queue(ws: WebSocket) :
 			mycursor.execute(query)
 
 			results = mycursor.fetchall()
-			print(results)
+			# print(results)
 
 			# 將 latitude 和 longitude 的 Decimal 類型轉為 float (Fix : Object of type Decimal is not JSON serializable)
 			for result in results:
 				result['latitude'] = float(result['latitude'])
 				result['longitude'] = float(result['longitude'])
-				result['action'] = "add"
 
 			# 將查詢結果透過 WebSocket 發送到客戶端
-			await ws.send_text(json.dumps(results))
+			await ws.send_text(json.dumps({'postcard':results,'action':'add'}))
 			# print(results)
 	except WebSocketDisconnect :
 		manager.disconnect(ws)
@@ -756,13 +957,14 @@ async def send_all_queue(ws: WebSocket) :
 		print("發生錯誤 : ", e)
 
 
-async def broadcast_queue_update(postcard_id : list, mailFrom : list, action : str) :
+async def broadcast_queue_update(postcard : list, action : str) :
 	try :
-		message = [{'postcardID': postcard_id, 'mailFrom' : mailFrom, 'action': action}]
+		message = {'postcard': postcard, 'action': action}
 		message_str = json.dumps(message)
 		await manager.broadcast(message_str)
 	except Exception as e :
 		print("發生錯誤 : ", e)
+
 
 
 # 顯示動畫的 websocket
@@ -773,7 +975,8 @@ async def ws_queue(ws: WebSocket):
 	try :
 		while True:
 			data = await ws.receive_text()
-			await broadcast_queue_update(data)
+			# await broadcast_queue_update(data)
 	except WebSocketDisconnect :
 		manager.disconnect(ws)
+
 
