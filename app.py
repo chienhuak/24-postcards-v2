@@ -980,3 +980,47 @@ async def ws_queue(ws: WebSocket):
 		manager.disconnect(ws)
 
 
+
+# 直接進行配對 + 新增明信片 + 變更用戶配對權重分數
+@app.get("/api/pairing", response_class=JSONResponse)
+async def pair_postcards(request: Request):
+
+	# 從 Authorization Header 中提取 token
+	auth_header = request.headers.get('Authorization')
+	if auth_header:
+		myjwt = auth_header.split(" ")[1] 
+
+		# 解碼 JWT
+		myjwtx = jwt.decode(myjwt,jwtkey,algorithms="HS256")
+
+		print("print myjwtx:", myjwtx)
+
+		# 解析請求的 JSON 資料
+		data = await request.json()
+
+		print("Print Received data:", data)
+
+		# 將資料存到資料庫
+		with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
+
+			query = """
+				SELECT name, score
+				FROM postcard_users
+				WHERE id != %s 
+				ORDER BY score DESC;
+				"""
+			mycursor.execute(query, (myjwtx["id"],))
+			highest_scoring_users = mycursor.fetchall()
+
+
+			# 3. 選擇最高分收件人，隨機選擇一個（如果有多個）
+			max_score = highest_scoring_users[0]['score']
+			candidates = [user for user in highest_scoring_users if user['score'] == max_score]
+
+			from random import choice
+			selected_user = choice(candidates)
+			receiver_id = selected_user['id']
+
+			return {
+				"pair_id": receiver_id
+				} 
