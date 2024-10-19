@@ -995,10 +995,13 @@ async def pair_postcards(request: Request):
 
 		print("print myjwtx:", myjwtx)
 
-		# 解析請求的 JSON 資料
-		data = await request.json()
+		# # 解析請求的 JSON 資料
+		# data = await request.json()
 
-		print("Print Received data:", data)
+		# if not data:
+		# 	raise HTTPException(status_code=400, detail="Empty request data")
+
+		# print("Print Received data:", data)
 
 		# 將資料存到資料庫
 		with mysql.connector.connect(pool_name="hello") as mydb, mydb.cursor(buffered=True,dictionary=True) as mycursor :
@@ -1013,14 +1016,14 @@ async def pair_postcards(request: Request):
 			highest_scoring_users = mycursor.fetchall()
 
 
-			# 3. 選擇最高分收件人，隨機選擇一個（如果有多個）
+			# 選擇最高分收件人，如果有多個就隨機選擇一個
 			max_score = highest_scoring_users[0]['score']
 			candidates = [user for user in highest_scoring_users if user['score'] == max_score]
 
 			from random import choice
 			selected_user = choice(candidates)
-			receiver_id = selected_user['id']
+			pair_user = selected_user['name']
 
 			return {
-				"pair_id": receiver_id
+				"pair_user": pair_user
 				} 
