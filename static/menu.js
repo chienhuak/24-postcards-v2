@@ -30,7 +30,10 @@ $(document).ready(function() {
 
 	}
   
-
+	// $( "#MessageDialog" ).dialog({
+	// 	autoOpen: false,
+	// 	modal: true,
+	// 	})
 
 	// 改成全域函式
 	window.newAction = function() {
@@ -56,10 +59,12 @@ $(document).ready(function() {
 			if (result) {
 				alert("信件成功寄出囉，但是需要一點時間才會寄達！")
 				$( this ).dialog( "close" )
+				$("#MessageDialog").dialog( "close" )
 			}
 		  },
 		  '取消': function() {
 			$( this ).dialog( "close" );
+			$("#MessageDialog").dialog( "close" );
 		  }
 		},
 		close: function() {
@@ -207,7 +212,7 @@ $(document).ready(function() {
 		// 調用後端 API 進行配對
 		const token = localStorage.getItem('token');
 
-		fetch("/api/pairing", {
+		await fetch("/api/pairing", {
 			headers: {
 				'Authorization': `Bearer ${token}`, // 將 JWT 放在 Authorization Header 中
 				'Content-Type': 'application/json'
@@ -217,63 +222,68 @@ $(document).ready(function() {
 		.then(response => response.json())
 		.then(data => {
 			console.log("Success get backend data:", data)
-			const pairedUserId = data.pair_id
+			const pairedUserId = data.pair_user
 
 			// 方法一：
-			// const pair_card = document.createElement('div')
-			// pair_card.className = pair_card
+			const pair_card = document.createElement('div')
+			pair_card.className = pair_card
 
-			// const text = document.createElement('p')
-			// text.innerText = `隨機配對用戶為: ${pairedUserId}`
-			// pair_card.appendChild(text);
+			const text = document.createElement('p')
+			text.innerText = `隨機配對用戶為: ${pairedUserId}`
+			pair_card.appendChild(text);
 
-			// const confirmButton = document.createElement('button')
-			// confirmButton.innerText = '確認寄出'
-			// confirmButton.style.marginRight = '10px'
-			// confirmButton.onclick = function() {
-			// 	alert('已確認寄出');
-			// 	document.body.removeChild(pair_card) // 移除彈出視窗
-			// 	document.body.removeChild(overlay) // 移除遮罩層
-			// };
-			// pair_card.appendChild(confirmButton)
+			const confirmButton = document.createElement('button')
+			confirmButton.innerText = '確認寄出'
+			confirmButton.style.marginRight = '10px'
+			confirmButton.onclick = function() {
+				alert('已確認寄出');
+				$("#MessageDialog").dialog("close");
+			};
+			pair_card.appendChild(confirmButton)
 
-			// // 取消按鈕
-			// const cancelButton = document.createElement('button')
-			// cancelButton.innerText = '取消'
-			// cancelButton.onclick = function() {
-			// 	document.body.removeChild(pair_card) // 移除彈出視窗
-			// 	document.body.removeChild(overlay) // 移除遮罩層
-			// };
-			// pair_card.appendChild(cancelButton)
+			// 取消按鈕
+			const cancelButton = document.createElement('button')
+			cancelButton.innerText = '取消'
+			cancelButton.onclick = function() {
+				$("#MessageDialog").dialog("close");
+			};
+			pair_card.appendChild(cancelButton)
 
-			// // 建立背景遮罩層
-			// const overlay = document.createElement('div')
+			// 建立背景遮罩層
+			const overlay = document.createElement('div')
 
-			// // 將彈出視窗和遮罩層加入到 body
+			// 將彈出視窗和遮罩層加入到 body
 			// document.body.appendChild(overlay)
 			// document.body.appendChild(pair_card)
+			$("#MessageDialog").empty().append(pair_card);
+			$("#MessageDialog").dialog({
+					modal: true, // 模態對話框
+					title: "系統配對結果", // 對話框標題
+					}
+				 ).dialog("open");//.dialog("moveToTop");
+			console.log('show pair dialog');
 
 
 			// 方法二：
-			// 顯示配對用戶信息和"確認寄出"按鈕
-			const confirmDialog = $("<div></div>").html(`
-				<p>系統已為你隨機配對用戶 ID: ${pairedUserId}</p>
-				<button id="confirm-send">確認寄出</button>
-			`)
+			// // 顯示配對用戶信息和"確認寄出"按鈕
+			// const confirmDialog = $("<div></div>").html(`
+			// 	<p>系統已為你隨機配對用戶 ID: ${pairedUserId}</p>
+			// 	<button id="confirm-send">確認寄出</button>
+			// `)
 
-			// 將對話框加入到 body 並設置為彈出對話框
-			confirmDialog.appendTo("body").dialog({
-				modal: true, // 模態對話框
-				title: "系統配對結果", // 對話框標題
-				buttons: {
-				'取消': function() {
-					$(this).dialog("close"); // 關閉對話框
-				}
-				}
-			})
+			// // 將對話框加入到 body 並設置為彈出對話框
+			// confirmDialog.appendTo("body").dialog({
+			// 	modal: true, // 模態對話框
+			// 	title: "系統配對結果", // 對話框標題
+			// 	buttons: {
+			// 	'取消': function() {
+			// 		$(this).dialog("close"); // 關閉對話框
+			// 	}
+			// 	}
+			// })
 
-			// 方法三：
-			// $( "#dialog" ).dialog({
+			// // 方法三：
+			// $( "#ialog" ).dialog({
 			// 	modal: true, // 模態對話框
 			// 	title: "系統配對結果", // 對話框標題
 			// 	buttons: {
